@@ -1,0 +1,148 @@
+1C Opening
+
+/*============*/
+Overview
+/*============*/
+Short Clubs with TRF responce.
+This opening contains some types of hands.
+
+1, C1+, (11)12 - 21HCP
+2, 18 - 19HCP, balanced, may have D5
+
+
+/*============*/
+Detail
+/*============*/
+
+1C
+  - 1D  H4+
+  - 1H  S4+
+  - 1S  D4+
+  - 1NT 6 - 10HCP
+  - 2C  NF
+  - 2D  C5+, FG
+  - 2H  C5+, INV
+  - 2S  C5D5, weak
+  - 2NT INV
+  - 3C  Preemptive
+  - 3X  SPL
+
+
+1C - 1D;
+1H  ① H3, less than FG ② H4, bare min
+  - 1S  NAT, F1
+  - 1NT NF
+  - 2C  Pup to 2D, any INV
+  - 2D  ART FG
+1S  S4, H0 ~ 2
+  - 1NT NF
+  - 2C  Pup to 2D, any INV
+  - 2D  ART FG
+1NT NF
+2C  NF
+2D  ①18 - 19HCP, balanced ②C5D4, INV
+  - 2H  H5+, NF
+  - 2S  ①0 ~ 6HCP, w/4M ②FG, BAL
+    - 2NT 18 - 19HCP, balanced
+      - 3X NAT
+    - 3C  C5D4, INV
+    - 3D  C6+, FG
+    - 3M  3cards, FG
+  - 2NT C4+, FG
+    - 3C  18 - 19HCP, balanced
+    - 3M  3cards
+  - 3C  D4+, FG
+    - 3D  18 - 19HCP, balanced
+    - 3M  3cards
+2NT C5D4, FG
+3D  18 - 19HCP, balanced, with fit
+4C  SPL
+
+
+1C - 1H;
+1S  S4, H0 ~ 2
+  - 1NT NF
+  - 2C  Pup to 2D, any INV
+  - 2D  ART FG
+1NT NF
+2C  NF
+2D  ①18 - 19HCP, balanced ②C5D4, INV
+  - 2H  ①0 ~ 6HCP, w/4M ②FG, BAL
+    - 2S  C5D4, INV
+      - 2NT C3+
+      - 3C  D4+
+      - 3D  H4+
+      - 3H  S6+
+    - 2NT 18 - 19HCP, balanced
+      - 3X NAT
+    - 3M  3cards, FG
+  - 2NT C4+, FG
+    - 3C  18 - 19HCP, balanced
+    - 3M  3cards
+  - 3C  D4+, FG
+    - 3D  18 - 19HCP, balanced
+    - 3M  3cards
+2H  NAT, Rev.
+  - 2S  catch all
+    - 2NT NF
+    - 3C  NF
+  - 2NT FG
+  - 3X  FG
+2NT C5D4, FG
+3D  18 - 19HCP, balanced, with fit
+4C  SPL
+
+
+1C - 1S;
+1NT 12 - 14HCP, balanced
+  - 2C  Pup to 2D
+    - 2D  Forced
+      - 2H  C5D4, INV
+      - 2S  C4D5, INV
+      - 2NT INV
+      - 3C  C5D5, INV
+      - 3D  D5(332), FG
+  - 2D  Forced
+  - 2H  C5D4, FG
+  - 2S  C4D5, FG
+  - 2NT C5D5, FG
+  - 3C  D6, SPL
+  - 3D  D6, FG
+  - 3M  D6, SPL
+
+
+1C - 2S;
+2NT INV+, Hand asking
+  - 3C  min
+    - 3D  S/O
+    - 3H  FG, Short asking
+      - 3S  H Short
+      - 3NT S Short
+  - 3D  H Short, No S stopper
+  - 3H  H Short, S stopper
+  - 3S  S Short, No H stopper
+  - 3NT S Short, H stopper
+3m  NF
+
+
+/*============*/
+VS intervention
+/*============*/
+
+1C - (1D) -
+Dbl H4+
+1H  S4+
+1S  ①C4, FG ②some value
+
+
+1C - (1H) -
+Dbl S4+
+1S  ①C4, FG ②some value
+
+
+System ON
+XYZ, Only if the immediately preceding player passes.
+
+System OFF
+1C - 1X;2D
+1C - 1R;2NT

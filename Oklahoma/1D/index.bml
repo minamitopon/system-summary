@@ -1,0 +1,114 @@
+1D Opening
+
+/*============*/
+Overview
+/*============*/
+Guarantee 5cards Diamonds.
+
+
+/*============*/
+Detail
+/*============*/
+
+1D
+  - 1H  H4+
+  - 1S  S4+
+  - 1NT 6 - 10HCP
+  - 2C  FG
+  - 2D  D3+, 8 - 11HCP
+  - 2H  D3+, FG
+  - 2S  D3+, INV
+  - 2NT INV
+  - 3C  C6, INV
+  - 3D  Preemptive
+  - 3M  SPL
+
+
+1D - 1H;
+2D  D6, 12 - 15HCP
+  - 2H  Pup to 2S
+    - 2S  Forced
+      - 2NT H5, INV
+      - 3C  C5H5, INV
+      - 3D  D3, FG
+      - 3H  H6, INV
+      - 3S  H6, SPL
+      - 3NT H5, NF
+  - 2S  NAT, FG
+  - 2NT INV
+  - 3C  C5H5, FG
+  - 3D  D3, INV
+  - 3H  FG
+  - 3S  D4, SPL
+  - 3NT NF
+2NT SPL
+  - 3C  Not min
+    - 3D  (13)14 - 15HCP, C Short
+    - 3H  (13)14 - 15HCP, S Short
+    - 3S  (15)16 - 18HCP, C Short
+    - 3NT (15)16 - 18HCP, S Short
+    - 4C  18+HCP, C Void
+    - 4D  18+HCP, S Void
+    - 4H  Play
+  - 3D  INV+
+    - 3H  (13)14 - 15HCP, C Short
+    - 3S  (13)14 - 15HCP, S Short
+    - 3NT  (15)16 - 18HCP, C Short
+    - 4C (15)16 - 18HCP, S Short
+    - 4D  18+HCP, C Void
+    - 4H  18+HCP, S Void
+  - 3H  min
+3S  18+HCP, S Singleton
+4C  18+HCP, C Singleton
+
+
+1D - 1S;
+2D  D6, 12 - 15HCP
+  - 2H  Pup to 2S
+    - 2S  Forced
+      - 2NT S5, INV
+      - 3C  C5S5, INV
+      - 3D  D3, FG
+      - 3H  H5, INV
+      - 3S  S6, INV
+      - 3NT S5, NF
+  - 2S  Const
+  - 2NT INV
+  - 3C  C5S5, FG
+  - 3D  D3, INV
+  - 3H  H5, FG
+  - 3S  FG
+  - 3NT NF
+  - 4C  D3, SPL
+  - 4H  D3, SPL
+2H  NAT, Rev.
+  - 2S  catch all
+    - 2NT NF
+    - 3C  NF
+    - 3D  NF
+  - 2NT FG
+  - 3X  FG
+2NT SPL
+  - 3C  Not min
+    - 3D  (13)14 - 15HCP, C Short
+    - 3H  (13)14 - 15HCP, H Short
+    - 3S  (15)16 - 18HCP, C Short
+    - 3NT (15)16 - 18HCP, H Short
+    - 4C  18+HCP, C Void
+    - 4D  18+HCP, H Void
+    - 4H  Play
+  - 3D  INV+
+    - 3H  (13)14 - 15HCP, C Short
+    - 3S  (13)14 - 15HCP, H Short
+    - 3NT  (15)16 - 18HCP, C Short
+    - 4C (15)16 - 18HCP, H Short
+    - 4D  18+HCP, C Void
+    - 4H  18+HCP, H Void
+  - 3S  min
+4C  18+HCP, C Singleton
+4H  18+HCP, H Singleton
+
+
+/*============*/
+VS intervention
+/*============*/
