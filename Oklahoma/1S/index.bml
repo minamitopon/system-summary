@@ -1,0 +1,173 @@
+1S Opening
+
+/*============*/
+Overview
+/*============*/
+Guarantee 5cards Spades.
+Could be 4cards in 3rd/4th seats.
+
+
+/*============*/
+Detail
+/*============*/
+
+1S
+  - 1NT semi-F
+  - 2D  ①H5, FG ②H6, INV
+  - 2H  D4, FG
+  - 2S  8 - 11HCP
+  - 2NT ①S4, balanced, FG ②S4, w/void, FG
+  - 3C  S4, w/singleton, FG
+  - 3D  S3, INV+
+  - 3H  S4, INV
+  - 3S  Preemptive
+  - 3NT Void SPL, 9 - 12HCP
+
+
+1S - 1NT;
+2C  ①D4 ②balanced
+  - 2D  D4, NF
+    - 2H  5341, INV
+    - 2S  S5, 14 - 16HCP
+    - 2NT S5(332), 17 - 19HCP, balanced
+    - 3C  5143, INV
+    - 3D  INV
+    - 3S  S6, INV
+  - 2H  NF
+    - 2S  S5, 14 - 16HCP
+    - 2NT S5(332), 17 - 19HCP, balanced
+    - 3C  5143, INV
+    - 3D  INV
+    - 3H  INV
+    - 3S  S6, INV
+  - 2S  NF
+    - 2NT S5(332), 17 - 19HCP, balanced
+    - 3C  5143, INV
+    - 3D  INV
+    - 3S  S6, INV
+  - 3C  C6, INV
+  - 3D  INV
+  - 3S  INV
+2D  H4
+  - 2H  NF
+    - 2S  54(xx), INV
+    - 2NT 5422, 17 - 19HCP, balanced
+    - 3C  5413, INV
+    - 3D  5431, INV
+    - 3H  H5S5, INV
+  - 2S  NF
+    - 2NT 5422, 17 - 19HCP, balanced
+    - 3C  5413, INV
+    - 3D  5431, INV
+    - 3H  H5S5, INV
+  - 3C  C6, INV
+  - 3D  D6, INV
+  - 3S  INV
+2H  C4
+  - 2S  NF
+    - 2NT 5(xx)4, 17 - 19HCP, balanced
+    - 3C  C5S5, INV
+    - 3D  5134, INV
+    - 3H  5314, INV
+2S  NF
+2NT ①S6, FG ②S5X5, FG
+  - 3C  asking
+    - 3D  C5S5, FG
+    - 3H  D5S5, FG
+    - 3S  H5S5, FG
+    - 3NT S6, FG, NF
+    - 4X  S6, FG, CTRL
+3C  S > C, FG
+3D  S > D, FG
+3H  S > H, FG
+
+
+1S - 2D;
+2H  NF
+2S  H2, FG
+  - 3S  H5S3
+2NT C4H0-1, FG
+3C  D4H0-1, FG
+3D  S6H0-1, FG
+3H  H3, FG
+3S  Good Spades
+
+
+1S - 2H;
+2S  Waiting, may have H4
+  - 2NT may have H4
+    - 3H  H4
+  - 3H  H4, min, No C stopper
+  - 3S  H4, max
+3H  H5
+
+
+1S - 2NT;
+3C asking
+  - 3D  balanced
+    - 3H  asking
+      - 3S  12 - 14HCP
+      - 3NT 15 - 17HCP
+      - 4C  18+HCP, C CTRL
+      - 4D  18+HCP, D CTRL
+      - 4H  18+HCP, H CTRL
+  - 3H  w/void, 12 - 14HCP
+    - 3S  asking
+      - 3NT C
+      - 4C  D
+      - 4D  H
+  - 3S  C, 15 - 17HCP
+  - 3NT D, 15 - 17HCP
+  - 4C  H, 15 - 17HCP
+  - 4D  C, 18+HCP
+  - 4H  D, 18+HCP
+  - 4S  H, 18+HCP
+
+
+1H - 3C;
+3D  asking
+  - 3H  12 - 14HCP
+    - 3S  asking
+      - 3NT C
+      - 4C  D
+      - 4D  H
+  - 3S  C, 15 - 17HCP
+  - 3NT D, 15 - 17HCP
+  - 4C  H, 15 - 17HCP
+  - 4D  C, 18+HCP
+  - 4H  D, 18+HCP
+  - 4S  H, 18+HCP
+
+
+1S - 3D;
+3H  asking
+  - 3S  11 - 13HCP
+  - 3NT 14 - 16HCP
+  - 4C  17+HCP, C CTRL
+  - 4D  17+HCP, D CTRL
+  - 4H  17+HCP, H CTRL
+3S  NF
+4C  C4
+4D  D4
+
+
+1S - 3NT;
+4C  asking
+  - 4D  C
+  - 4H  D
+  - 4S  H
+
+
+/*============*/
+VS intervention
+/*============*/
+
+System ON
+P - 1S;
+1NT - any
+system on over 1NT(6 - 12HCP)
+
+System OFF
+1S - (X) - 1NT - (P);
+any
+system off over 1NT(8 - 10HCP)
