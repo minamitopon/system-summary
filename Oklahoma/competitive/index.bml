@@ -161,20 +161,28 @@ X   Cards
 3C  Diamonds
 
 
+(1NT) -
+X   Spades + any
+2C  Clubs + Hearts
+2D  Diamonds + Hearts
+2H  NAT
+2S  NAT
+2NT C + D
+3C  Diamonds
+
+
 (1NT) - X - (P) -
-2C  Positive, 8 - 10HCP
-  - 2D  Good hand
-  - 2H  min
-  - 2NT M65
-  - 3m  NAT, 4cards
-2D  ask better M
-2NT Shape ask
-  - 3C  H5S4, min
-  - 3D  H4S5, min
-  - 3H  H5S5, min
-  - 3S  H5S4, max
-  - 3NT H4S5, max
-3M  Preemptive
+2C  P/C
+2D  P/C
+2H  P/C
+2S  Play
+2NT asking
+  - 3C  NAT, min
+  - 3D  NAT, min
+  - 3H  NAT, min
+  - 3S  Spades + minor, max
+  - 3NT Spades + Hearts, max
+
 
 (1NT) - 2m - (P) -
 2NT Shape ask
