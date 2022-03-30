@@ -1,0 +1,115 @@
+1C Opening
+
+/*============*/
+Overview
+/*============*/
+Short Clubs with TRF responce.
+This opening contains some types of hands.
+
+1, C1+, (11)12 - 21HCP
+2, 18 - 19HCP, balanced, may have D5
+
+
+/*============*/
+Detail
+/*============*/
+
+1C
+  - 1D  0 - 7HCP
+  - 1H  ①S4+, 8+HCP ②Ms+m, 8+HCP
+  - 1S  ①Balanced, 8+HCP ②H+D, 8+HCP
+  - 1NT C4+, 8+HCP
+  - 2C  ①D4+, 8+HCP ②Ms+m, 8+HCP
+  - 2D  H4+, 8+HCP
+  - 2H  C+D, 8+HCP(Reverser)
+  - 2S  C5D5, 8+HCP
+  - 2NT C+D, low short, 8+HCP
+  - 3C  C+D, even short, 8+HCP
+  - 3D  1354, 8+HCP
+  - 3H  1264, 8+HCP
+  - 3S  0364, 8+HCP
+  - 3NT 0274, 8+HCP
+  - 4C  Triple short
+
+1C - 1D;
+1H  Pup to 1S
+  - 1S  Accept
+    - 1NT Balanced, 20 - 22HCP
+      - 2C  System on
+    - 2X  NAT, FG
+    - 2NT Balanced, 23 - 24HCP
+  - 1NT C5D5, 5 - 7HCP
+  - 2C  C5H5, 5 - 7HCP
+  - 2D  C5S5, 5 - 7HCP
+  - 2H  D5H5, 5 - 7HCP
+  - 2S  D5S5, 5 - 7HCP
+  - 2NT H5S5, 5 - 7HCP
+1S  NAT, 17 - 21HCP
+  - P   poor hand
+  - 1NT NF, 5 - 7HCP
+  - 2C  NAT, NF
+  - 2D  NAT, NF
+  - 2H  NAT, NF
+  - 2S  S3, 4 - 5HCP
+  - 2NT S3, 6 - 7HCP
+  - 3C  NAT, 6 - 7HCP
+  - 3D  NAT, 6 - 7HCP
+  - 3H  NAT, 6 - 7HCP
+  - 3S  NAT, INV
+  - 4C  SPL
+  - 4D  SPL
+  - 4H  SPL
+1NT Balanced, 17 - 19HCP
+  - 2C  System on
+2C  NAT, 17 - 21HCP
+  - 2D  ①NAT, F1 ②C3, INV, F1
+  - 2H  H4, F1
+  - 2S  S4, F1
+  - 2NT INV
+  - 3C  NF
+  - 3D  INV
+  - 3H  INV
+  - 3S  INV
+2D  NAT, 17 - 21HCP
+  - 2H  H4, F1
+  - 2S  S4, F1
+  - 2NT INV
+  - 3C  D3, INV
+  - 3D  NF
+  - 3H  INV
+  - 3S  INV
+2H  NAT, 17 - 21HCP
+  - 2S  S4, F1
+  - 2NT H3, INV
+  - 3C  CONST
+  - 3D  CONST
+  - 3H  NF
+  - 3S  INV
+2S  NAT, FG, Support Asking
+2NT H5, FG, Support Asking
+3C  NAT, FG, Support Asking
+3D  NAT, FG, Support Asking
+
+
+
+/*============*/
+VS intervention
+/*============*/
+
+1C - (1D) -
+Dbl H4+
+1H  S4+
+1S  ①C4, FG ②some value
+
+
+1C - (1H) -
+Dbl S4+
+1S  ①C4, FG ②some value
+
+
+System ON
+XYZ, Only if the immediately preceding player passes.
+
+System OFF
+1C - 1X;2D
+1C - 1R;2NT
