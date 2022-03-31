@@ -60,7 +60,7 @@ Detail
 
 
 1C - 1H;
-1S  S4, H0 ~ 2
+1S  ① S3, less than FG ② S4, bare min
   - 1NT NF
   - 2C  Pup to 2D, any INV
   - 2D  ART FG
@@ -99,13 +99,13 @@ Detail
     - 2D  Forced
       - 2H  C5D4, INV
       - 2S  C4D5, INV
-      - 2NT INV
+      - 2NT C5D5, FG
       - 3C  C5D5, INV
       - 3D  D5(332), FG
-  - 2D  Forced
+  - 2D  D6, INV
   - 2H  C5D4, FG
   - 2S  C4D5, FG
-  - 2NT C5D5, FG
+  - 2NT INV
   - 3C  D6, SPL
   - 3D  D6, FG
   - 3M  D6, SPL
