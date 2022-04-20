@@ -142,14 +142,27 @@ XX  Pup to 2C
 2D  D + M
 2H  H + S
 
-1NT - (2m = Ms) -
+1NT - (2C/D = Ms) -
 X   Cards
 2D  S/O
 2H  C, INV
 2S  D, INV
 2NT C, weak or FG
 3C  D, weak or FG
-3M  stopper
+3D  only H Stopper
+3H  only S Stopper
+3S  No Stopper
+3NT Both Stopper
+
+
+1NT - (2C/2D = 1M) -
+X   cards, force to 2NT, next Dbl = Pen
+2H  NAT, S/O
+2S  NAT, S/O
+2NT C, weak or FG
+3C  D, weak or FG
+3D  H5, INV+
+3H  S5, INV+
 
 
 1X - (1NT) -
