@@ -111,12 +111,23 @@ Detail
   - 3M  D6, SPL
 2C  C6+, NF
 2D  D4, 12 - 15HCP
-2H  ①18 - 19HCP, balanced ②C5D4, INV ③4441, INV
+2H  ①18 - 19HCP, balanced ②C5D4, INV ③4441, FG
   - 2S  asking
     - 2NT 18 - 19HCP
-      - 3X  same as 2NT opening
+      - 3C 2254 or (32)44, FG
+        - 3D  D4
+        - 3H  C4, value
+        - 3S  C4, value
+        - 3NT No fit
+      - 3D D6, FG
+      - 3H 3154, SPL
+      - 3S 1354, SPL
     - 3C  C5D4, INV
-    - 3D  4441, INV
+    - 3D  4414, FG
+    - 3H  4144, FG
+    - 3S  1444, FG
+    - 3NT 4441, NF
+    - 4C  4441, FG
   - 2NT D5C5, FG
     - 3m  fit
       - 3M  SPL
@@ -136,15 +147,15 @@ Detail
   - 3D  D6+, FG
   - 3H  D6+, SPL
   - 3S  D6+, SPL
-2NT ①C5D4, FG ②C6M5, FG ③4441, FG
-  - 3C  asking
-    - 3D  C5D4
+2NT ①C5D4, FG ②C6M5, FG ③C4(441), INV
+  - 3C  NF
+    - 3D  C5D4, FG
     - 3H  C6H5
     - 3S  C6S5
-    - 3NT 4441, NF
-    - 4C  4441, S/T
+  - 3D FG, asking
+
 3C  C6+, INV
-3D  C6+, SPL
+3D  D4(441), INV
 3H  C6+, SPL
 3S  C6+, SPL
 
