@@ -17,13 +17,13 @@ Detail
 1C
   - 1D  H4+
   - 1H  S4+
-  - 1S  D4+
-  - 1NT 6 - 10HCP
+  - 1S  ① D4+ ②balanced, 6 - 10HCP
+  - 1NT 11 - 12HCP
   - 2C  NF
   - 2D  C5+, FG
   - 2H  C5+, INV
   - 2S  C5D5, weak
-  - 2NT INV
+  - 2NT 13 - 15HCP
   - 3C  Preemptive
   - 3X  SPL
 
@@ -109,6 +109,58 @@ Detail
   - 3C  D6, SPL
   - 3D  D6, FG
   - 3M  D6, SPL
+2C  C6+, NF
+2D  D4, 12 - 15HCP
+2H  ①18 - 19HCP, balanced ②C5D4, INV ③(4441), FG ④(41)44, INV
+  - 2S  asking
+    - 2NT 18 - 19HCP
+      - 3C 2254 or (32)44, FG
+        - 3D  D4
+        - 3H  C4, value
+        - 3S  C4, value
+        - 3NT No fit
+      - 3D D6, FG
+      - 3H 3154, SPL
+      - 3S 1354, SPL
+    - 3C  ①C5D4, INV ②(41)44, INV
+      - 3D  S/O
+      - 3H  value
+      - 3S  value
+      - 3NT S/O
+    - 3D  4414, FG
+    - 3H  4144, FG
+    - 3S  1444, FG
+    - 3NT 4441, NF
+    - 4C  4441, FG
+  - 2NT D5C5, FG
+    - 3m  fit
+      - 3M  SPL
+  - 3C  D6+, SPL
+  - 3D  D6+, FG
+  - 3H  D6+, SPL
+  - 3S  D6+, SPL
+2S  ①C5H4, INV+ ②C5S4, INV+ ③4414, INV
+  - 2NT asking
+    - 3C  min
+      - Pass
+      - 3D  NF
+    - 3D  D3, FG
+    - 3H  C5H4, FG
+    - 3S  C5S4, FG
+  - 3C  C3+, FG
+  - 3D  D6+, FG
+  - 3H  D6+, SPL
+  - 3S  D6+, SPL
+2NT ①C5D4, FG ②C6M5, FG
+  - 3C  asking
+    - 3D  C5D4, FG
+    - 3H  C6H5
+    - 3S  C6S5
+  - 3D  Good D6+
+3C  C6+, INV
+3D  4441, INV
+3H  C6+, SPL
+3S  C6+, SPL
 
 
 1C - 2S;
