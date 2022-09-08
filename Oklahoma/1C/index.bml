@@ -18,7 +18,7 @@ Detail
   - 1D  H4+
   - 1H  S4+
   - 1S  ① D4+ ②balanced, 6 - 10HCP
-  - 1NT 11 - 12HCP
+  - 1NT 10 - 12HCP
   - 2C  NF
   - 2D  C5+, FG
   - 2H  C5+, INV
@@ -162,6 +162,10 @@ Detail
 3H  C6+, SPL
 3S  C6+, SPL
 
+1C - 1NT;
+2C NF, C5+
+2X INV+, X4
+  - 2N min, NF
 
 1C - 2S;
 2NT INV+, Hand asking
