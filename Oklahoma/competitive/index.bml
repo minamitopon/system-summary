@@ -1,16 +1,21 @@
-VS intervention
+vs intervention
 
 /*============*/
 Index
 /*============*/
-1, 2-suiter 2NT OC
-2,
-3,
-4,
-5,
-6,
-7,
-
+1,  2-suiter 2NT OC
+2,  Lebensohl & Rubensohl
+3,  Good 2NT, Bad 2NT
+4,  Support 2NT
+5,  After 3NT OC
+6,  1NT
+7,  vs 2D, 2H (Ms Weak)
+8,  Switching
+9,  vs T/O Dbl
+10, Drury
+11, vs ART bids
+12, Forcing Pass
+13, XYZ
 
 /*============*/
 Detail
@@ -33,12 +38,12 @@ Situation
 
 2NT Pup to 3C
   - 3C  accept
-    - Cue 4MO + stopper
+    - Cue 4MO + No stopper
     - Bid weak
-    - 3NT 4OM + No stopper
-- Cue No MO + stopper
+    - 3NT 4OM + stopper
+- Cue No MO + No stopper
 - Bid some value
-- 3NT No OM + No stopper
+- 3NT No OM + stopper
 
 2-2 Rubensohl
 
@@ -132,7 +137,7 @@ Situation
 
 6, 1NT
 
-VS Multi Landy
+vs Multi Landy
 1NT - (X) -
 P   Play
 XX  Pup to 2C
@@ -216,11 +221,18 @@ New suit  NF
   - 3NT Good suit,max
 
 
-7, Vs 2H (Ms Weak)
+7, vs 2D, 2H (Ms Weak)
+
+(2D) -
+X  12 - 14HCP, BAL
+2H  C ≧ D
+2S  C < D
+2NT 15 - 18HCP, BAL
 
 (2H) -
-X   C ≧ D
-2S  C < D
+X  C ≧ D
+2S C < D
+2NT 15 - 18HCP, BAL
 
 
 8, Switching
@@ -232,7 +244,7 @@ Situation
 ④Oppornent bids only one suit.
 
 
-9, VS T/O Dbl
+9, vs T/O Dbl
 
 1M - (X) -
 1NT 8 - 10HCP
@@ -249,12 +261,22 @@ Situation
 ③ P - (P) - 1X - (1Y)
 
 
-11, VS ART bids
+11, vs ART bids
 
 12, Forcing Pass
 
+① Force to bid Game.
+② Not after 1M - SPL, FSJ
 
+13, XYZ
+
+1C - 1X;
+1Y -
+2C  pup to 2D
+  - 2D  accept
+    - 2NT INV with C5
+2NT INV
 
 /*============*/
-VS intervention
+vs intervention
 /*============*/
