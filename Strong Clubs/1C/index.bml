@@ -90,7 +90,66 @@ Detail
 3C  NAT, FG, Support Asking
 3D  NAT, FG, Support Asking
 
+/*============*/
+Basic structure
+/*============*/
 
+1, 1 Suit
+
+1C - 1H/1NT/2C
+Re Relay
+  - 2S  low short
+    - 2NT Relay
+      - 3C  7222
+      - 3D  5332
+      - 3H  6331
+      - 3S  7321
+      - 3NT 7330
+      - 4C  8221
+      - 4D  8320
+      - 4H  8230
+  - 2NT mid short
+    - 3C  Relay
+      - 3D  5323
+      - 3H  6313
+      - 3S  7312
+      - 3NT 7213
+      - 4C  7303
+      - 4D  8212
+      - 4H  8302
+      - 4S  8203
+  - 3C  even short
+    - 3D  Relay
+      - 3H  6223
+      - 3S  6232
+      - 3NT 6322
+      - 4C  9112
+      - 4D  9121
+      - 4H  9211
+      - 4S  10111
+      - 4NT 11002
+      - 5C  11020
+      - 5D  11200
+      - 5H  12001
+      - 5S  12010
+      - 5NT 12100
+      - 6C  13000
+  - 3D  5233
+  - 3H  6133
+  - 3S  7132
+  - 3NT 7123
+  - 4C  7033
+  - 4D  8122
+  - 4H  8032
+  - 4S  8023
+
+
+2, 2 Suit
+
+1C - 1st suit
+Re - 2nd suit
+Re
+  - 2H  Reverser
 
 /*============*/
 VS intervention
