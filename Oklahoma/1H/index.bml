@@ -137,6 +137,17 @@ Detail
 4D  D4
 
 
+1H - 3H;
+3S  asking
+  - 3NT C short
+  - 4C  D short
+  - 4D  S short
+  - 4H  No short
+3NT require S value
+4C  require C value
+4D  require D value
+
+
 1H - 3S;
 3NT asking
   - 4C  C
