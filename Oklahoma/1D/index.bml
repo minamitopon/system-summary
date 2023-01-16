@@ -41,23 +41,23 @@ Detail
   - 3H  FG
   - 3S  D4, SPL
   - 3NT NF
-2NT SPL
-  - 3C  Not min
-    - 3D  (13)14 - 15HCP, C Short
-    - 3H  (13)14 - 15HCP, S Short
-    - 3S  (15)16 - 18HCP, C Short
-    - 3NT (15)16 - 18HCP, S Short
-    - 4C  18+HCP, C Void
-    - 4D  18+HCP, S Void
-    - 4H  Play
-  - 3D  INV+
-    - 3H  (13)14 - 15HCP, C Short
-    - 3S  (13)14 - 15HCP, S Short
-    - 3NT  (15)16 - 18HCP, C Short
-    - 4C (15)16 - 18HCP, S Short
-    - 4D  18+HCP, C Void
-    - 4H  18+HCP, S Void
-  - 3H  min
+2NT D6, INV+
+  - 3C  waiting
+    - 3D  D6H3, INV
+      - 3H  NF
+      - 3S  ask stopper, then 4D = D, others = H
+      - 4C  Fit D, S/T
+    - 3H  D6H3, FG
+    - 3S  D6, FG, ask stopper
+    - 3NT D6, FG, NF
+  - 3D  terrible minimum
+    - 3H  D6H3, FG
+    - 3S  D6, FG, ask stopper
+    - 3NT D6, FG, NF
+  - 3H  Very Good 6+, S/T
+3D  D6H0 ~ 2, INV
+  - 3H  H6+, FG
+3H  INV
 3S  18+HCP, S Singleton
 4C  18+HCP, C Singleton
 
@@ -88,23 +88,25 @@ Detail
     - 3D  NF
   - 2NT FG
   - 3X  FG
-2NT SPL
-  - 3C  Not min
-    - 3D  (13)14 - 15HCP, C Short
-    - 3H  (13)14 - 15HCP, H Short
-    - 3S  (15)16 - 18HCP, C Short
-    - 3NT (15)16 - 18HCP, H Short
-    - 4C  18+HCP, C Void
-    - 4D  18+HCP, H Void
-    - 4H  Play
-  - 3D  INV+
-    - 3H  (13)14 - 15HCP, C Short
-    - 3S  (13)14 - 15HCP, H Short
-    - 3NT  (15)16 - 18HCP, C Short
-    - 4C (15)16 - 18HCP, H Short
-    - 4D  18+HCP, C Void
-    - 4H  18+HCP, H Void
-  - 3S  min
+2NT D6, INV+
+  - 3C  waiting
+    - 3D  D6S3, INV
+      - 3H  ask stopper, then 4D = D, others = S
+      - 3S  NF
+    - 3H  D6H3, FG
+    - 3S  D6, FG, ask stopper
+    - 3NT D6, FG, NF
+  - 3D  terrible minimum
+    - 3H  D6H3, FG
+    - 3S  D6, FG, ask stopper
+    - 3NT D6, FG, NF
+  - 3H  S5H5, not minimum
+  - 3S  Very Good 6+, S/T
+3D  D6H0 ~ 2, INV
+  - 3H  H5+, FG
+  - 3S  S6+, FG
+3H  S4, INV w/shape
+3S  S4, INV w/value
 4C  18+HCP, C Singleton
 4H  18+HCP, H Singleton
 
