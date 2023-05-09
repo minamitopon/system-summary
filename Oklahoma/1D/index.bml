@@ -64,19 +64,19 @@ Detail
 
 1D - 1S;
 2D  D6, 12 - 15HCP
-  - 2H  Pup to 2S
-    - 2S  Forced
-      - 2NT S5, INV
+  - 2H  NAT, F1
+  - 2S  Pup to 2NT
+    - 2NT Forced
       - 3C  C5S5, INV
-      - 3D  D3, FG
-      - 3H  H5, INV
+      - 3D  NAT, FG
+      - 3H  H5S5, INV
       - 3S  S6, INV
-      - 3NT S5, NF
-  - 2S  Const
+      - 3NT S5, FG
+      - 4X  S6, SPL
   - 2NT INV
   - 3C  C5S5, FG
-  - 3D  D3, INV
-  - 3H  H5, FG
+  - 3D  INV
+  - 3H  H5S5, FG
   - 3S  FG
   - 3NT NF
   - 4C  D3, SPL
