@@ -85,6 +85,7 @@ Situation
 ① Overcalled by partner.
 ② We're all in on the auction.
 ③ Can't cuebid below 2level.
+④ P(1H)1S(2H);2NT = SUPP
 
 5, After 3NT OC
 
@@ -263,6 +264,10 @@ Situation
 
 11, vs ART bids
 
+(1M) - (2NT/3X = ART raise)
+3NT ms (ART raise = FG)
+3NT To play (ART raise = other)
+
 12, Forcing Pass
 
 ① Force to bid Game.
@@ -275,8 +280,21 @@ Situation
 2C  pup to 2D
   - 2D  accept
     - 2NT INV with C5
+    - 3NT FG with 5cards(enough strength)
+2D  FG
+  - 2M M
+    - 3NT FG with 5cards(not having enough strength)
 2NT INV
 
+P - 1X;
+1Y - 1NT;
+2C  F1
+2D  NF
+
 /*============*/
-vs intervention
+Overcall
 /*============*/
+
+(1M) - 2m - (2M) - P;
+(P) -
+2NT m6H4
