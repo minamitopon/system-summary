@@ -93,12 +93,12 @@ Detail
     - 3D  D6S3, INV
       - 3H  ask stopper, then 4D = D, others = S
       - 3S  NF
-    - 3H  D6H3, FG
-    - 3S  D6, FG, ask stopper
+    - 3H  D6, FG, ask stopper
+    - 3S  D6S3, FG
     - 3NT D6, FG, NF
   - 3D  terrible minimum
-    - 3H  D6H3, FG
-    - 3S  D6, FG, ask stopper
+    - 3H  D6, FG, ask stopper
+    - 3S  D6S3, FG
     - 3NT D6, FG, NF
   - 3H  S5H5, not minimum
   - 3S  Very Good 6+, S/T
