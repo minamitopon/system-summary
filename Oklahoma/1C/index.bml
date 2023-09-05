@@ -18,12 +18,12 @@ Detail
   - 1D  H4+
   - 1H  S4+
   - 1S  ① D4+ ②balanced, 6 - 10HCP
-  - 1NT 10 - 12HCP
+  - 1NT 11 - 12HCP, 33(43)
   - 2C  NF
   - 2D  C5+, FG
   - 2H  C5+, INV
   - 2S  C5D5, weak
-  - 2NT 13 - 15HCP
+  - 2NT 13 - 15HCP, 33(43)
   - 3C  Preemptive
   - 3X  SPL
 
@@ -56,6 +56,10 @@ Detail
     - 3M  3 cards
 2NT C5D4, FG
 3D  18 - 19HCP, balanced, with fit
+  - 3H  pup to 3NT, to play
+  - 3NT CTRL in Spade
+  - 4C  CTRL in club
+  - 4D  pup to 4H
 4C  SPL
 
 
@@ -90,6 +94,10 @@ Detail
   - 3X  FG
 2NT C5D4, FG
 3D  18 - 19HCP, balanced, with fit
+  - 3H  pup to 3NT, to play
+  - 3NT CTRL in Heart
+  - 4C  CTRL in club
+  - 4H  pup to 4S
 4C  SPL
 
 
