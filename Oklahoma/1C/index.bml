@@ -54,7 +54,15 @@ Detail
   - 3C  D4+, FG
     - 3D  18 - 19HCP, balanced
     - 3M  3 cards
-2NT C5D4, FG
+2NT ①C5D4, FG ②C6, FG
+  - 3C  waiting
+    - 3D  C5D4
+    - 3H  SPL
+    - 3S  SPL
+    - 3NT NF
+  - 3D  H5
+  - 3H  H6, Good
+  - 4D  pup to 4H
 3D  18 - 19HCP, balanced, with fit
   - 3H  pup to 3NT, to play
   - 3NT CTRL in Spade
@@ -92,7 +100,16 @@ Detail
     - 3C  NF
   - 2NT FG
   - 3X  FG
-2NT C5D4, FG
+2NT ①C5D4, FG ②C6, FG
+  - 3C  waiting
+    - 3D  C5D4
+    - 3H  SPL
+    - 3S  SPL
+    - 3NT NF
+  - 3D  H5
+  - 3H  S5
+  - 3S  S6, Good
+  - 4H  pup to 4S
 3D  18 - 19HCP, balanced, with fit
   - 3H  pup to 3NT, to play
   - 3NT CTRL in Heart
@@ -159,11 +176,12 @@ Detail
   - 3D  D6+, FG
   - 3H  D6+, SPL
   - 3S  D6+, SPL
-2NT ①C5D4, FG ②C6M5, FG
+2NT ①C5D4, FG ②C6, FG
   - 3C  asking
     - 3D  C5D4, FG
     - 3H  C6H5
     - 3S  C6S5
+    - 3NT C6
   - 3D  Good D6+
 3C  C6+, INV
 3D  4441, INV
@@ -210,3 +228,12 @@ XYZ, Only if the immediately preceding player passes.
 System OFF
 1C - 1X;2D
 1C - 1R;2NT
+
+
+/*============*/
+In 3rd/4th seat
+/*============*/
+
+P - 1C;1S - 1NT
+2C  INV
+2D  NAT, INV

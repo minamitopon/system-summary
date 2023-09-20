@@ -183,3 +183,36 @@ System OFF
 1S - (X) - 1NT - (P);
 any
 system off over 1NT(8 - 10HCP)
+
+
+/*============*/
+In 3rd/4th seat
+/*============*/
+
+P - 1S
+2C  Drury
+  - 2D
+    - 2H  min
+    - 2S  S3, max
+    - 2NT S5
+    - 3C  S4, value
+    - 3D  S4, value
+    - 3H  S4, value
+    - 3S  S4
+    - 3NT S4, any Void
+        - 4C  asking
+          - 4D  S4C0
+          - 4H  S4D0
+          - 4S  S4H0
+    - 4X  S4X1
+2NT C6S3, INV
+3C  INV
+3D  D6S3, INV
+3H  H6S3, INV
+3S  CONST
+3NT S5, any Void
+  - 4C  asking
+    - 4D  S5C0
+    - 4H  S5D0
+    - 4S  S5H0
+4X  S5X1
