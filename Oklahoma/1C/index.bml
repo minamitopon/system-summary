@@ -18,12 +18,12 @@ Detail
   - 1D  H4+
   - 1H  S4+
   - 1S  ① D4+ ②balanced, 6 - 10HCP
-  - 1NT 10 - 12HCP
+  - 1NT 11 - 12HCP, 33(43)
   - 2C  NF
   - 2D  C5+, FG
   - 2H  C5+, INV
   - 2S  C5D5, weak
-  - 2NT 13 - 15HCP
+  - 2NT 13 - 15HCP, 33(43)
   - 3C  Preemptive
   - 3X  SPL
 
@@ -40,6 +40,22 @@ Detail
   - 2D  ART FG
 1NT NF
 2C  NF
+  - 2D  asking
+    - 2H  min
+      - 2NT FG
+      - 3C  FG
+      - 3D  FG
+      - 3H  FG
+    - 2S  max
+      - 2NT FG
+      - 3C  FG
+      - 3D  FG
+      - 3H  FG
+  - 2H  NF
+  - 2S  S4H5
+  - 2NT INV
+  - 3C  INV
+  - 3H  S/T
 2D  ①18 - 19HCP, balanced ②C5D4, INV
   - 2H  H5+, NF
   - 2S  ①0 ~ 6HCP, w/4M ②FG, BAL
@@ -54,8 +70,20 @@ Detail
   - 3C  D4+, FG
     - 3D  18 - 19HCP, balanced
     - 3M  3 cards
-2NT C5D4, FG
+2NT ①C5D4, FG ②C6, FG
+  - 3C  waiting
+    - 3D  C5D4
+    - 3H  SPL
+    - 3S  SPL
+    - 3NT NF
+  - 3D  H5
+  - 3H  H6, Good
+  - 4D  pup to 4H
 3D  18 - 19HCP, balanced, with fit
+  - 3H  pup to 3NT, to play
+  - 3NT CTRL in Spade
+  - 4C  CTRL in club
+  - 4D  pup to 4H
 4C  SPL
 
 
@@ -66,6 +94,23 @@ Detail
   - 2D  ART FG
 1NT NF
 2C  NF
+  - 2D  asking
+    - 2H  max
+      - 2NT FG
+      - 3C  FG
+      - 3D  FG
+      - 3H  FG
+    - 2S  min
+      - 2NT FG
+      - 3C  FG
+      - 3D  FG
+      - 3H  FG
+  - 2H  S5H4, INV
+  - 2S  S4H5
+  - 2NT INV
+  - 3C  INV
+  - 3H  S5H5, INV
+  - 3S  S/T
 2D  ①18 - 19HCP, balanced ②C5D4, INV
   - 2H  ①0 - 6HCP, w/4M ②FG, BAL
     - 2S  C5D4, INV
@@ -88,8 +133,21 @@ Detail
     - 3C  NF
   - 2NT FG
   - 3X  FG
-2NT C5D4, FG
+2NT ①C5D4, FG ②C6, FG
+  - 3C  waiting
+    - 3D  C5D4
+    - 3H  SPL
+    - 3S  SPL
+    - 3NT NF
+  - 3D  H5
+  - 3H  S5
+  - 3S  S6, Good
+  - 4H  pup to 4S
 3D  18 - 19HCP, balanced, with fit
+  - 3H  pup to 3NT, to play
+  - 3NT CTRL in Heart
+  - 4C  CTRL in club
+  - 4H  pup to 4S
 4C  SPL
 
 
@@ -151,11 +209,12 @@ Detail
   - 3D  D6+, FG
   - 3H  D6+, SPL
   - 3S  D6+, SPL
-2NT ①C5D4, FG ②C6M5, FG
+2NT ①C5D4, FG ②C6, FG
   - 3C  asking
     - 3D  C5D4, FG
     - 3H  C6H5
     - 3S  C6S5
+    - 3NT C6
   - 3D  Good D6+
 3C  C6+, INV
 3D  4441, INV
@@ -202,3 +261,12 @@ XYZ, Only if the immediately preceding player passes.
 System OFF
 1C - 1X;2D
 1C - 1R;2NT
+
+
+/*============*/
+In 3rd/4th seat
+/*============*/
+
+P - 1C;1S - 1NT
+2C  INV
+2D  NAT, INV

@@ -43,4 +43,6 @@ ACOL 4NT
 5H  DA
 5S  HA
 5NT SA
-6C  2A
+6C  color
+6D  rank
+6H  shape

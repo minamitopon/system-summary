@@ -42,19 +42,19 @@ Detail
   - 3S  D4, SPL
   - 3NT NF
 2NT D6, INV+
-  - 3C  waiting
+  - 3C  not minimum
     - 3D  D6H3, INV
-      - 3H  NF
-      - 3S  ask stopper, then 4D = D, others = H
+      - 3H  FG
+      - 3S  ask stopper
       - 4C  Fit D, S/T
     - 3H  D6H3, FG
     - 3S  D6, FG, ask stopper
     - 3NT D6, FG, NF
-  - 3D  terrible minimum
+  - 3D  minimum
     - 3H  D6H3, FG
     - 3S  D6, FG, ask stopper
     - 3NT D6, FG, NF
-  - 3H  Very Good 6+, S/T
+  - 3H  minimum
 3D  D6H0 ~ 2, INV
   - 3H  H6+, FG
 3H  INV
@@ -89,19 +89,23 @@ Detail
   - 2NT FG
   - 3X  FG
 2NT D6, INV+
-  - 3C  waiting
+  - 3C  not minimum
     - 3D  D6S3, INV
-      - 3H  ask stopper, then 4D = D, others = S
-      - 3S  NF
+      - 3H  ask stopper
+      - 3S  FG
     - 3H  D6, FG, ask stopper
     - 3S  D6S3, FG
     - 3NT D6, FG, NF
-  - 3D  terrible minimum
+  - 3D  minimum
     - 3H  D6, FG, ask stopper
     - 3S  D6S3, FG
     - 3NT D6, FG, NF
   - 3H  S5H5, not minimum
-  - 3S  Very Good 6+, S/T
+    - 3S  D6S3
+    - 4C  H3, Good
+    - 4D  D6, FG
+    - 4H  H3, Bad
+  - 3S  minimum
 3D  D6H0 ~ 2, INV
   - 3H  H5+, FG
   - 3S  S6+, FG
