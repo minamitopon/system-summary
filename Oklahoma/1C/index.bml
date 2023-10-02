@@ -40,6 +40,22 @@ Detail
   - 2D  ART FG
 1NT NF
 2C  NF
+  - 2D  asking
+    - 2H  min
+      - 2NT FG
+      - 3C  FG
+      - 3D  FG
+      - 3H  FG
+    - 2S  max
+      - 2NT FG
+      - 3C  FG
+      - 3D  FG
+      - 3H  FG
+  - 2H  NF
+  - 2S  S4H5
+  - 2NT INV
+  - 3C  INV
+  - 3H  S/T
 2D  ①18 - 19HCP, balanced ②C5D4, INV
   - 2H  H5+, NF
   - 2S  ①0 ~ 6HCP, w/4M ②FG, BAL
@@ -78,6 +94,23 @@ Detail
   - 2D  ART FG
 1NT NF
 2C  NF
+  - 2D  asking
+    - 2H  max
+      - 2NT FG
+      - 3C  FG
+      - 3D  FG
+      - 3H  FG
+    - 2S  min
+      - 2NT FG
+      - 3C  FG
+      - 3D  FG
+      - 3H  FG
+  - 2H  S5H4, INV
+  - 2S  S4H5
+  - 2NT INV
+  - 3C  INV
+  - 3H  S5H5, INV
+  - 3S  S/T
 2D  ①18 - 19HCP, balanced ②C5D4, INV
   - 2H  ①0 - 6HCP, w/4M ②FG, BAL
     - 2S  C5D4, INV
