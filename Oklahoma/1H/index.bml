@@ -128,7 +128,7 @@ Detail
 3D  asking
   - 3H  11 - 12HCP
   - 3S  12 - 14HCP
-  - 3NT S, 15 - 17HCP
+  - 3NT 15 - 17HCP
   - 4C  18+HCP, C CTRL
   - 4D  18+HCP, D CTRL
   - 4H  18+HCP, S CTRL
@@ -168,3 +168,36 @@ System OFF
 1H - (X) - 1NT - (P);
 any
 system off over 1NT(8 - 10HCP)
+
+/*============*/
+In 3rd/4th seat
+/*============*/
+
+P - 1H
+2C  Drury
+  - 2D
+    - 2H  min
+    - 2S  H3, max
+    - 2NT H5
+    - 3C  H4, value
+    - 3D  H4, value
+    - 3H  H4
+    - 3S  H4, any Void
+        - 3NT asking
+          - 4C  H4C0
+          - 4D  H4D0
+          - 4H  H4S0
+    - 3NT H4S1
+    - 4X  H4X1
+2S  S6H3, INV
+2NT C6H3, INV
+3C  INV
+3D  D6H3, INV
+3H  CONST
+3S  H5, any Void
+  - 3NT asking
+    - 4C  H5C0
+    - 4D  H5D0
+    - 4H  H5S0
+3NT H5S1
+4X  H5X1

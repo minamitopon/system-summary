@@ -16,6 +16,7 @@ Index
 11, vs ART bids
 12, Forcing Pass
 13, XYZ
+14, Leaping Michaels
 
 /*============*/
 Detail
@@ -290,6 +291,20 @@ P - 1X;
 1Y - 1NT;
 2C  F1
 2D  NF
+
+14, Leaping Michaels
+
+① (2M) - ?
+② (2M) - 2NT - (P) -
+③ (1M) - P - (2M) -
+
+4m  leaping Michaels
+
+15, Negative Double
+
+1m - (PRE) - X - (P);
+any - (P) -
+new suit = NAT, NF
 
 /*============*/
 Overcall
