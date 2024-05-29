@@ -62,8 +62,7 @@ Detail
     - 2NT 18 - 19HCP, balanced
       - 3X NAT
     - 3C  C5D4, INV
-    - 3D  C6+, FG
-    - 3M  3 cards, FG
+    - 3OM 3 cards
   - 2NT C4+, FG
     - 3C  18 - 19HCP, balanced
     - 3M  3 cards
@@ -81,8 +80,9 @@ Detail
   - 4D  pup to 4H
 3D  18 - 19HCP, balanced, with fit
   - 3H  pup to 3NT, to play
-  - 3NT CTRL in Spade
-  - 4C  CTRL in club
+  - 3S  CTRL
+  - 3NT NF
+  - 4C  CTRL
   - 4D  pup to 4H
 4C  SPL
 
@@ -144,9 +144,11 @@ Detail
   - 3S  S6, Good
   - 4H  pup to 4S
 3D  18 - 19HCP, balanced, with fit
-  - 3H  pup to 3NT, to play
-  - 3NT CTRL in Heart
-  - 4C  CTRL in club
+  - 3H  CTRL
+  - 3S  pup to 3NT, to play
+  - 3NT NF
+  - 4C  CTRL
+  - 3H  CTRL
   - 4H  pup to 4S
 4C  SPL
 
