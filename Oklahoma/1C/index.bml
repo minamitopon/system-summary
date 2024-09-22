@@ -77,13 +77,13 @@ Detail
     - 3NT NF
   - 3D  H5
   - 3H  H6, Good
-  - 4D  pup to 4H
+  - 4D  Pup to 4H
 3D  18 - 19HCP, balanced, with fit
-  - 3H  pup to 3NT, to play
+  - 3H  Pup to 3NT, to play
   - 3S  CTRL
   - 3NT NF
   - 4C  CTRL
-  - 4D  pup to 4H
+  - 4D  Pup to 4H
 4C  SPL
 
 
@@ -142,14 +142,14 @@ Detail
   - 3D  H5
   - 3H  S5
   - 3S  S6, Good
-  - 4H  pup to 4S
+  - 4H  Pup to 4S
 3D  18 - 19HCP, balanced, with fit
   - 3H  CTRL
-  - 3S  pup to 3NT, to play
+  - 3S  Pup to 3NT, to play
   - 3NT NF
   - 4C  CTRL
   - 3H  CTRL
-  - 4H  pup to 4S
+  - 4H  Pup to 4S
 4C  SPL
 
 
@@ -272,3 +272,31 @@ In 3rd/4th seat
 P - 1C;1S - 1NT
 2C  INV
 2D  NAT, INV
+
+
+/*============*/
+Subsequence
+/*============*/
+
+1, VWXYZ
+
+1C - 1D;
+1H - 1S;
+1NT -
+2C  Pup to 2D
+2D  FG
+
+2, Delayed Reverse
+
+1C - 1D;
+1H - 1S;
+2D  NAT, Reverse, INV
+  - 2H  NF
+  - 2S  waiting
+    - 2NT NF
+    - 3C  NF
+  - 2NT NF
+  - 3m  FG
+  - 3H  fit, FG
+  - 3S  S5
+  - 3NT 4432, NF
