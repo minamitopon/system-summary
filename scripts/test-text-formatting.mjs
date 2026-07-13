@@ -40,6 +40,14 @@ assert.equal(neutral.includes("holding-token"), false);
 const bid = decorateText("1H");
 assert.match(bid, /class="bid-token suit-heart">1♥<\/span>/);
 
+const goodBadTwoNt = decorateText("Good 2NT, Bad 2NT");
+assert.deepEqual(holdingTokens("Good 2NT, Bad 2NT"), []);
+assert.equal(goodBadTwoNt.replace(/<[^>]+>/g, ""), "Good 2NT, Bad 2NT");
+
+for (const prose of ["Cards 2NT", "Methods 3NT", "Lebensohl 2NT"]) {
+  assert.deepEqual(holdingTokens(prose), [], prose);
+}
+
 const repositoryRoot = fileURLToPath(new URL("..", import.meta.url));
 const bmlFiles = fs
   .readdirSync(path.join(repositoryRoot, "Oklahoma"), { withFileTypes: true })

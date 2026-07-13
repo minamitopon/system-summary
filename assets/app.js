@@ -1127,7 +1127,7 @@ function showToast(message) {
 }
 
 function decorateText(text, context = "") {
-  const tokenPattern = /(\b[1-7]OM\b|\b[1-7](?:NT|[CDHSX])\b|[1-7][♣♦♥♠]|[CDHS♣♦♥♠]\s*\d+(?:\s*(?:~|〜|-|–)\s*\d+|\s*\+)?|\d+\+?\s*cards?\s+(?:Clubs?|Diamonds?|Hearts?|Spades?)|[CDHS♣♦♥♠]\s+(?:Singleton|Void)|\b(?:Clubs?|Diamonds?|Hearts?|Spades?)\b|\bM\d+\+?\b|\bOM\b|\b(?:NT|NAT|ART|FG|INV|NF|CTRL|SPL|RKCB|HCP)\b|S\/O|F1|F2|♣|♦|♥|♠)/gi;
+  const tokenPattern = /(\b[1-7]OM\b|\b[1-7](?:NT|[CDHSX])\b|[1-7][♣♦♥♠]|(?<![A-Za-z])[CDHS♣♦♥♠]\s*\d+(?:\s*(?:~|〜|-|–)\s*\d+|\s*\+)?|\d+\+?\s*cards?\s+(?:Clubs?|Diamonds?|Hearts?|Spades?)|(?<![A-Za-z])[CDHS♣♦♥♠]\s+(?:Singleton|Void)|\b(?:Clubs?|Diamonds?|Hearts?|Spades?)\b|\bM\d+\+?\b|\bOM\b|\b(?:NT|NAT|ART|FG|INV|NF|CTRL|SPL|RKCB|HCP)\b|S\/O|F1|F2|♣|♦|♥|♠)/gi;
   return String(text)
     .split(tokenPattern)
     .map((part) => {
