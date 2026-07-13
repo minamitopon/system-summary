@@ -1,18 +1,16 @@
 const REPOSITORY_URL = "https://github.com/minamitopon/system-summary";
 const STORAGE_KEYS = {
-  openCards: "oklahoma-system-open-cards-v1",
-  activeDocument: "oklahoma-system-active-document-v1",
+  openCards: "oklahoma-system-open-cards-v2",
+  openResponses: "oklahoma-system-open-responses-v2",
+  activeDocument: "oklahoma-system-active-document-v2",
 };
 
+const PREVIEW_USERS = [
+  { id: "honda", name: "本田", initial: "本", github: "pon-64" },
+  { id: "seshimo", name: "瀬下", initial: "瀬", github: "minamitopon" },
+];
+
 const DOCUMENTS = [
-  {
-    id: "home",
-    label: "Overview",
-    title: "System Overview",
-    subtitle: "Oklahoma の全体像",
-    path: "Oklahoma/README.md",
-    accent: "overview",
-  },
   {
     id: "1C",
     label: "1♣",
@@ -129,17 +127,30 @@ const DOCUMENTS = [
 
 const state = {
   documents: new Map(),
+  targetIndex: new Map(),
+  cardIndex: new Map(),
+  embeddedCardIds: new Set(),
   activeDocumentId: getInitialDocumentId(),
   openCards: readStoredSet(STORAGE_KEYS.openCards),
-  searchQuery: "",
+  openResponses: readStoredSet(STORAGE_KEYS.openResponses),
+  previewUserIndex: 0,
+  draftChanges: [],
+  comments: [],
+  composerMode: "edit",
+  composerTargetId: null,
 };
 
 const contentRoot = document.querySelector("#content-root");
 const loadingState = document.querySelector("#loading-state");
 const sidebarNav = document.querySelector("#sidebar-nav");
 const mobileNav = document.querySelector("#mobile-nav");
-const searchInput = document.querySelector("#system-search");
 const openCount = document.querySelector("#open-count");
+const proposalDrawer = document.querySelector("#proposal-drawer");
+const drawerBackdrop = document.querySelector("#drawer-backdrop");
+const composerDialog = document.querySelector("#composer-dialog");
+const composerForm = document.querySelector("#composer-form");
+const composerBody = document.querySelector("#composer-body");
+const editMode = document.querySelector("#edit-mode");
 
 init();
 
@@ -169,16 +180,20 @@ async function init() {
   );
 
   state.documents = new Map(results);
+  buildTargetIndex();
+  linkContinuationCards();
   loadingState.hidden = true;
   document.querySelector("#document-count").textContent = `${DOCUMENTS.length} sections`;
+  updatePreviewUser();
   render();
+  renderDraftDrawer();
 }
 
 function getInitialDocumentId() {
   const fromHash = new URLSearchParams(window.location.hash.replace(/^#/, "")).get("doc");
   const stored = localStorage.getItem(STORAGE_KEYS.activeDocument);
   const candidate = fromHash || stored;
-  return DOCUMENTS.some((item) => item.id === candidate) ? candidate : "home";
+  return DOCUMENTS.some((item) => item.id === candidate) ? candidate : "1C";
 }
 
 function readStoredSet(key) {
@@ -199,67 +214,183 @@ function parseDocument(meta, source) {
   const sections = [];
 
   if (!markers.length) {
-    sections.push(createSection("Notes", normalized, meta.id, 0));
+    sections.push(createSection("Notes", normalized, meta, 0));
   } else {
     const preamble = normalized.slice(0, markers[0].index).trim();
-    if (preamble) sections.push(createSection("Summary", preamble, meta.id, 0));
+    if (preamble) sections.push(createSection("Summary", preamble, meta, 0));
 
-    markers.forEach((marker, index) => {
+    markers.forEach((marker) => {
       const bodyStart = marker.index + marker[0].length;
-      const bodyEnd = markers[index + 1]?.index ?? normalized.length;
+      const markerIndex = markers.indexOf(marker);
+      const bodyEnd = markers[markerIndex + 1]?.index ?? normalized.length;
       const body = normalized.slice(bodyStart, bodyEnd).trim();
-      if (body) sections.push(createSection(marker[1].trim(), body, meta.id, sections.length));
+      if (body) sections.push(createSection(marker[1].trim(), body, meta, sections.length));
     });
   }
 
   return { ...meta, source: normalized, sections };
 }
 
-function createSection(title, body, documentId, sectionIndex) {
+function createSection(title, body, meta, sectionIndex) {
   const blocks = body
     .split(/\n\s*\n+/)
     .map((block) => block.trimEnd())
     .filter(Boolean)
-    .map((block, blockIndex) => createCard(block, documentId, sectionIndex, blockIndex));
+    .map((block, blockIndex) => createCard(block, meta, sectionIndex, blockIndex));
 
   return { title, blocks };
 }
 
-function createCard(block, documentId, sectionIndex, blockIndex) {
+function createCard(block, meta, sectionIndex, blockIndex) {
   const lines = block.split("\n").filter((line) => line.trim());
   const first = lines[0]?.trim() || "Notes";
-  const title = first.replace(/^#{1,6}\s*/, "").replace(/^[-–]\s*/, "");
+  const title = cleanLine(first.replace(/^#{1,6}\s*/, ""));
+  const id = `${meta.id}-${sectionIndex}-${blockIndex}`;
+  const nodes = parseLineTree(lines.slice(1), id);
+
+  annotateNodes(nodes, { cardId: id, topNodeId: null, ancestors: [title] });
+
   return {
-    id: `${documentId}-${sectionIndex}-${blockIndex}`,
+    id,
+    documentId: meta.id,
+    path: meta.path,
     title,
     lines,
-    searchText: `${title} ${lines.join(" ")}`.toLocaleLowerCase(),
+    nodes,
   };
 }
 
+function parseLineTree(lines, cardId) {
+  if (!lines.length) return [];
+  const parsed = lines.map((line, index) => ({
+    id: `${cardId}-node-${index}`,
+    raw: line,
+    indent: line.match(/^\s*/)[0].length,
+    text: cleanLine(line),
+    children: [],
+  }));
+  const minIndent = Math.min(...parsed.map((item) => item.indent));
+  const roots = [];
+  const stack = [];
+
+  parsed.forEach((node) => {
+    const depth = Math.max(0, Math.round((node.indent - minIndent) / 2));
+    node.depth = depth;
+    while (stack.length > depth) stack.pop();
+    if (depth === 0 || !stack[depth - 1]) roots.push(node);
+    else stack[depth - 1].children.push(node);
+    stack[depth] = node;
+    stack.length = depth + 1;
+  });
+
+  return roots;
+}
+
+function annotateNodes(nodes, context) {
+  nodes.forEach((node) => {
+    const topNodeId = context.topNodeId || node.id;
+    node.cardId = context.cardId;
+    node.topNodeId = topNodeId;
+    node.contextText = [...context.ancestors, node.text].join(" ; ");
+    annotateNodes(node.children, {
+      cardId: context.cardId,
+      topNodeId,
+      ancestors: [...context.ancestors, node.text],
+    });
+  });
+}
+
+function cleanLine(line) {
+  return line.trim().replace(/^[-–]\s*/, "");
+}
+
+function buildTargetIndex() {
+  state.targetIndex.clear();
+  state.cardIndex.clear();
+  state.documents.forEach((documentData) => {
+    documentData.sections.forEach((section) => {
+      section.blocks.forEach((card) => {
+        state.cardIndex.set(card.id, card);
+        state.targetIndex.set(card.id, {
+          id: card.id,
+          kind: "card",
+          text: card.title,
+          label: card.title,
+          cardId: card.id,
+          topNodeId: null,
+          documentId: card.documentId,
+          path: card.path,
+        });
+        walkNodes(card.nodes, (node) => {
+          state.targetIndex.set(node.id, {
+            id: node.id,
+            kind: "response",
+            text: node.text,
+            label: node.contextText,
+            cardId: node.cardId,
+            topNodeId: node.topNodeId,
+            documentId: card.documentId,
+            path: card.path,
+          });
+        });
+      });
+    });
+  });
+}
+
+function linkContinuationCards() {
+  state.embeddedCardIds.clear();
+  state.documents.forEach((documentData) => {
+    documentData.sections.forEach((section) => {
+      const cardByAuction = new Map(section.blocks.map((card) => [normalizeAuction(card.title), card.id]));
+
+      section.blocks.forEach((card) => {
+        card.nodes.forEach((node) => {
+          delete node.linkedCardId;
+          const bid = node.text.match(/^(?:Dbl|XX|[1-7](?:NT|[CDHSX]))\b/)?.[0];
+          if (!bid) return;
+          const linkedCardId = cardByAuction.get(normalizeAuction(`${card.title}-${bid}`));
+          if (linkedCardId && linkedCardId !== card.id) {
+            node.linkedCardId = linkedCardId;
+            state.embeddedCardIds.add(linkedCardId);
+          }
+        });
+      });
+    });
+  });
+}
+
+function normalizeAuction(value) {
+  return String(value)
+    .toUpperCase()
+    .replaceAll("♣", "C")
+    .replaceAll("♦", "D")
+    .replaceAll("♥", "H")
+    .replaceAll("♠", "S")
+    .replace(/[^A-Z0-9]/g, "");
+}
+
+function walkNodes(nodes, callback) {
+  nodes.forEach((node) => {
+    callback(node);
+    walkNodes(node.children, callback);
+  });
+}
+
 function renderNavigation() {
-  const navigationItems = DOCUMENTS.map(
+  sidebarNav.innerHTML = DOCUMENTS.map(
     (item) => `
-      <button
-        class="nav-item accent-${item.accent}"
-        type="button"
-        data-document-id="${item.id}"
-        aria-current="${item.id === state.activeDocumentId ? "page" : "false"}"
-      >
+      <button class="nav-item accent-${item.accent}" type="button" data-document-id="${item.id}"
+        aria-current="${item.id === state.activeDocumentId ? "page" : "false"}">
         <span class="nav-label">${item.label}</span>
         <span class="nav-subtitle">${item.subtitle}</span>
       </button>`,
   ).join("");
 
-  sidebarNav.innerHTML = navigationItems;
   mobileNav.innerHTML = DOCUMENTS.map(
     (item) => `
-      <button
-        class="mobile-nav-item accent-${item.accent}"
-        type="button"
-        data-document-id="${item.id}"
-        aria-current="${item.id === state.activeDocumentId ? "page" : "false"}"
-      >${item.label}</button>`,
+      <button class="mobile-nav-item accent-${item.accent}" type="button" data-document-id="${item.id}"
+        aria-current="${item.id === state.activeDocumentId ? "page" : "false"}">${item.label}</button>`,
   ).join("");
 
   document.querySelectorAll("[data-document-id]").forEach((button) => {
@@ -268,32 +399,32 @@ function renderNavigation() {
 }
 
 function bindControls() {
-  searchInput.addEventListener("input", (event) => {
-    state.searchQuery = event.target.value.trim();
-    render();
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeActionMenus();
   });
 
-  document.addEventListener("keydown", (event) => {
-    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
-      event.preventDefault();
-      searchInput.focus();
-    }
-    if (event.key === "Escape" && document.activeElement === searchInput) {
-      searchInput.value = "";
-      state.searchQuery = "";
-      searchInput.blur();
-      render();
-    }
+  document.addEventListener("click", (event) => {
+    if (!event.target.closest(".action-menu")) closeActionMenus();
   });
+  window.addEventListener("resize", () => closeActionMenus());
+  window.addEventListener("scroll", () => closeActionMenus(), { passive: true });
 
   document.querySelector("#expand-all").addEventListener("click", () => setAllVisible(true));
   document.querySelector("#collapse-all").addEventListener("click", () => setAllVisible(false));
-  document.querySelector("#focus-search").addEventListener("click", () => {
-    searchInput.focus({ preventScroll: true });
-    window.scrollTo({ top: document.querySelector(".toolbar-wrap").offsetTop, behavior: "smooth" });
-  });
   document.querySelector("#previous-document").addEventListener("click", () => moveDocument(-1));
   document.querySelector("#next-document").addEventListener("click", () => moveDocument(1));
+  document.querySelector("#preview-user").addEventListener("click", switchPreviewUser);
+  document.querySelector("#drawer-preview-user").addEventListener("click", switchPreviewUser);
+  document.querySelector("#open-proposal-drawer").addEventListener("click", openDrawer);
+  document.querySelector("#mobile-open-draft").addEventListener("click", openDrawer);
+  document.querySelector("#close-proposal-drawer").addEventListener("click", closeDrawer);
+  drawerBackdrop.addEventListener("click", closeDrawer);
+  document.querySelector("#close-composer").addEventListener("click", closeComposer);
+  document.querySelector("#cancel-composer").addEventListener("click", closeComposer);
+  composerForm.addEventListener("submit", saveComposer);
+  editMode.addEventListener("change", updateEditMode);
+  composerBody.addEventListener("input", renderComposerPreview);
+
   window.addEventListener("hashchange", () => {
     const id = new URLSearchParams(window.location.hash.replace(/^#/, "")).get("doc");
     if (id && DOCUMENTS.some((item) => item.id === id) && id !== state.activeDocumentId) {
@@ -306,8 +437,6 @@ function bindControls() {
 
 function selectDocument(id) {
   state.activeDocumentId = id;
-  state.searchQuery = "";
-  searchInput.value = "";
   localStorage.setItem(STORAGE_KEYS.activeDocument, id);
   history.replaceState(null, "", `#doc=${encodeURIComponent(id)}`);
   renderNavigation();
@@ -323,22 +452,19 @@ function selectDocument(id) {
 
 function moveDocument(direction) {
   const currentIndex = DOCUMENTS.findIndex((item) => item.id === state.activeDocumentId);
-  const nextIndex = (currentIndex + direction + DOCUMENTS.length) % DOCUMENTS.length;
-  selectDocument(DOCUMENTS[nextIndex].id);
+  selectDocument(DOCUMENTS[(currentIndex + direction + DOCUMENTS.length) % DOCUMENTS.length].id);
 }
 
 function render() {
   if (!state.documents.size) return;
-  contentRoot.innerHTML = state.searchQuery ? renderSearchResults() : renderActiveDocument();
-  bindCardEvents();
+  contentRoot.innerHTML = renderActiveDocument();
+  bindContentEvents();
   updateOpenCount();
 }
 
 function renderActiveDocument() {
   const documentData = state.documents.get(state.activeDocumentId);
   if (!documentData) return "";
-
-  const sourceUrl = `${REPOSITORY_URL}/blob/main/${documentData.path}`;
   const totalCards = documentData.sections.reduce((count, section) => count + section.blocks.length, 0);
 
   return `
@@ -349,13 +475,13 @@ function renderActiveDocument() {
           <h2>${escapeHtml(documentData.title)}</h2>
           <p>${escapeHtml(documentData.subtitle)}</p>
         </div>
-        <a class="source-link" href="${sourceUrl}" target="_blank" rel="noreferrer">
+        <a class="source-link" href="${REPOSITORY_URL}/blob/main/${documentData.path}" target="_blank" rel="noreferrer">
           原文を見る <span aria-hidden="true">↗</span>
         </a>
       </header>
       <div class="document-stats" aria-label="文書情報">
         <span><strong>${totalCards}</strong> topics</span>
-        <span>開いた項目はこの端末に保存されます</span>
+        <span>1段目でレスポンス一覧、2段目でその先を表示します</span>
       </div>
       ${renderDocumentBody(documentData)}
     </article>`;
@@ -368,152 +494,507 @@ function renderDocumentBody(documentData) {
   if (!documentData.sections.length) {
     return `<div class="empty-state"><span aria-hidden="true">♧</span><h3>まだノートがありません</h3><p>この項目は、原文が追加されると自動的に表示されます。</p></div>`;
   }
-
   return documentData.sections.map((section) => renderSection(section, documentData)).join("");
 }
 
 function renderSection(section, documentData) {
+  if (section.title.toLowerCase() === "overview") {
+    return renderOpeningOverview(section, documentData);
+  }
+  const memoBlocks = section.blocks.filter(isSystemMemo);
+  const visibleBlocks = section.blocks.filter(
+    (card) => !state.embeddedCardIds.has(card.id) && !isSystemMemo(card),
+  );
+  const biddingSection = visibleBlocks.length
+    ? `
+      <section class="note-section">
+        <div class="section-heading">
+          <span></span><h3>${escapeHtml(section.title)}</h3><small>${visibleBlocks.length} topics</small>
+        </div>
+        <div class="card-stack">${visibleBlocks.map((card) => renderCard(card, documentData)).join("")}</div>
+      </section>`
+    : "";
+
+  return `${biddingSection}${memoBlocks.length ? renderMemoSection(memoBlocks) : ""}`;
+}
+
+function isSystemMemo(card) {
+  return /^system\s+(?:on|off)\b/i.test(card.title.trim());
+}
+
+function renderMemoSection(cards) {
   return `
-    <section class="note-section">
+    <section class="note-section memo-section">
       <div class="section-heading">
-        <span></span>
-        <h3>${escapeHtml(section.title)}</h3>
-        <small>${section.blocks.length} topics</small>
+        <span></span><h3>Memo</h3><small>${cards.length} notes</small>
       </div>
-      <div class="card-stack">
-        ${section.blocks.map((card) => renderCard(card, documentData)).join("")}
+      <div class="memo-stack">${cards.map((card) => renderMemoBlock(card)).join("")}</div>
+    </section>`;
+}
+
+function renderMemoBlock(card) {
+  const items = [];
+  walkNodes(card.nodes, (node) => items.push(node));
+  const isOff = /^system\s+off\b/i.test(card.title.trim());
+
+  return `
+    <article class="memo-card ${isOff ? "memo-card--off" : "memo-card--on"}">
+      <header class="memo-header">
+        <span class="memo-status">${escapeHtml(card.title)}</span>
+        <span class="memo-header-actions">${renderCommentCount(card.id)}${renderInlineActions(card.id, true)}</span>
+      </header>
+      ${renderComments(card.id)}
+      <div class="memo-lines">
+        ${items
+          .map(
+            (item) => `
+              <div class="memo-item">
+                <div class="memo-line">
+                  <span>${decorateText(item.text, item.contextText)}</span>
+                  ${renderCommentCount(item.id)}
+                  ${renderInlineActions(item.id, true)}
+                </div>
+                ${renderComments(item.id)}
+              </div>`,
+          )
+          .join("")}
+      </div>
+    </article>`;
+}
+
+function renderOpeningOverview(section, documentData) {
+  return `
+    <section class="note-section opening-overview-section">
+      <div class="section-heading">
+        <span></span><h3>Opening Overview</h3><small>hand types</small>
+      </div>
+      <div class="opening-overview accent-${documentData.accent}">
+        ${section.blocks.map((card) => renderOverviewBlock(card)).join("")}
       </div>
     </section>`;
 }
 
-function renderCard(card, documentData, options = {}) {
-  const isOpen = state.openCards.has(card.id) || options.forceOpen;
-  const titleLineIndex = card.lines.findIndex((line) => line.trim());
-  const remainingLines = card.lines.filter((_, index) => index !== titleLineIndex);
-  if (!remainingLines.length) {
-    return `
-      <div class="system-card system-card--static accent-${documentData.accent}">
-        <span class="summary-copy">${decorateText(card.title)}</span>
-      </div>`;
-  }
-  const body = remainingLines.length
-    ? `<div class="card-body">${renderIndentedLines(remainingLines)}</div>`
-    : "";
+function renderOverviewBlock(card) {
+  const items = [{ id: card.id, text: card.title, context: card.title }];
+  walkNodes(card.nodes, (node) => items.push({ id: node.id, text: node.text, context: node.contextText }));
+  const numbered = items.every((item) => /^\d+,\s*/.test(item.text));
 
   return `
-    <details class="system-card accent-${documentData.accent}" data-card-id="${card.id}" ${isOpen ? "open" : ""}>
+    <div class="overview-block ${numbered ? "overview-block--patterns" : ""}">
+      ${items
+        .map((item) => {
+          const match = item.text.match(/^(\d+),\s*(.*)$/);
+          const displayText = match ? match[2] : item.text;
+          return `
+            <div class="overview-item">
+              <div class="overview-line">
+                ${match ? `<span class="overview-number">${match[1]}</span>` : `<span class="overview-mark" aria-hidden="true"></span>`}
+                <span class="overview-copy">${decorateText(displayText, item.context)}</span>
+                ${renderInlineActions(item.id, true)}
+                ${renderCommentCount(item.id)}
+              </div>
+              ${renderComments(item.id)}
+            </div>`;
+        })
+        .join("")}
+    </div>`;
+}
+
+function renderCard(card, documentData, options = {}) {
+  const isOpen = options.forceOpen || state.openCards.has(card.id);
+  if (!card.nodes.length) {
+    return `
+      <div class="system-card system-card--static accent-${documentData.accent}">
+        <span class="summary-copy">${decorateText(card.title, card.title)}</span>
+        ${renderInlineActions(card.id)}
+        ${renderComments(card.id)}
+      </div>`;
+  }
+
+  return `
+    <details class="system-card accent-${documentData.accent}" data-state-id="${card.id}" data-state-kind="card" ${isOpen ? "open" : ""}>
       <summary>
-        <span class="summary-copy">${decorateText(card.title)}</span>
-        <span class="summary-meta">
-          ${remainingLines.length ? `<small>${remainingLines.length} lines</small>` : ""}
-          <span class="chevron" aria-hidden="true"></span>
-        </span>
+        <span class="summary-copy">${decorateText(card.title, card.title)}</span>
+        <span class="summary-meta">${renderCommentCount(card.id)}${renderInlineActions(card.id, true)}<span class="chevron" aria-hidden="true"></span></span>
       </summary>
-      ${body}
+      <div class="card-body">
+        ${renderComments(card.id)}
+        <div class="response-list">
+          ${card.nodes.map((node) => renderTopResponse(node, documentData, card, options.forceOpen)).join("")}
+        </div>
+      </div>
     </details>`;
 }
 
-function renderIndentedLines(lines) {
-  const minIndent = Math.min(...lines.map((line) => line.match(/^\s*/)[0].length));
-  return lines
-    .map((line) => {
-      const rawIndent = Math.max(0, line.match(/^\s*/)[0].length - minIndent);
-      const depth = Math.min(8, Math.round(rawIndent / 2));
-      const trimmed = line.trim().replace(/^[-–]\s*/, "");
-      const isBranch = /^[-–]\s*/.test(line.trimStart());
+function renderTopResponse(node, documentData, card, forceOpen = false) {
+  const context = `${card.title} ; ${node.text}`;
+  const linkedCard = node.linkedCardId ? state.cardIndex.get(node.linkedCardId) : null;
+  const hasChildren = node.children.length > 0 || Boolean(linkedCard?.nodes.length);
+  if (!hasChildren) return renderResponseRow(node, context, 0);
+  const isOpen = forceOpen || state.openResponses.has(node.id);
+
+  return `
+    <details class="response-card ${linkedCard ? "response-card--linked" : ""} accent-${documentData.accent}" data-state-id="${node.id}" data-state-kind="response" ${isOpen ? "open" : ""}>
+      <summary>
+        <span>${decorateText(node.text, context)}</span>
+        <span class="response-summary-meta">${renderCommentCount(node.id)}${renderInlineActions(node.id, true)}<span class="chevron" aria-hidden="true"></span></span>
+      </summary>
+      <div class="response-body">
+        ${renderComments(node.id)}
+        ${
+          linkedCard
+            ? `<div class="response-list response-list--nested">${linkedCard.nodes
+                .map((child) => renderTopResponse(child, documentData, linkedCard, forceOpen))
+                .join("")}</div>`
+            : renderDescendants(node.children, 0, context)
+        }
+      </div>
+    </details>`;
+}
+
+function renderDescendants(nodes, depth, parentContext) {
+  return nodes
+    .map((node) => {
+      const context = `${parentContext} ; ${node.text}`;
       return `
-        <div class="system-line ${isBranch ? "system-line--branch" : ""}" style="--depth:${depth}">
-          <span class="branch-mark" aria-hidden="true"></span>
-          <span>${decorateText(trimmed)}</span>
-        </div>`;
+        ${renderResponseRow(node, context, depth)}
+        ${node.children.length ? renderDescendants(node.children, depth + 1, context) : ""}`;
     })
     .join("");
 }
 
-function renderSearchResults() {
-  const query = state.searchQuery.toLocaleLowerCase();
-  const matches = [];
-
-  state.documents.forEach((documentData) => {
-    documentData.sections.forEach((section) => {
-      section.blocks.forEach((card) => {
-        if (card.searchText.includes(query)) matches.push({ documentData, section, card });
-      });
-    });
-  });
-
+function renderResponseRow(node, context, depth) {
   return `
-    <section class="search-results">
-      <header class="search-results-header">
-        <div>
-          <p class="document-kicker">SYSTEM SEARCH</p>
-          <h2>「${escapeHtml(state.searchQuery)}」の検索結果</h2>
-        </div>
-        <span>${matches.length}件</span>
-      </header>
-      ${
-        matches.length
-          ? `<div class="search-result-list">${matches
-              .map(
-                ({ documentData, section, card }) => `
-                  <div class="search-result-group">
-                    <button class="result-location accent-${documentData.accent}" type="button" data-result-document="${documentData.id}">
-                      ${escapeHtml(documentData.label)} <span>/ ${escapeHtml(section.title)}</span>
-                    </button>
-                    ${renderCard(card, documentData, { forceOpen: true })}
-                  </div>`,
-              )
-              .join("")}</div>`
-          : `<div class="empty-state"><span aria-hidden="true">◇</span><h3>該当するノートがありません</h3><p>表記を変えるか、短いキーワードで検索してみてください。</p></div>`
-      }
-    </section>`;
+    <div class="response-row-wrap" style="--depth:${Math.min(depth, 7)}">
+      <div class="response-row">
+        <span class="branch-mark" aria-hidden="true"></span>
+        <span class="response-copy">${decorateText(node.text, context)}</span>
+        ${renderInlineActions(node.id, true)}
+        ${renderCommentCount(node.id)}
+      </div>
+      ${renderComments(node.id)}
+    </div>`;
 }
 
-function bindCardEvents() {
-  contentRoot.querySelectorAll("details[data-card-id]").forEach((details) => {
+function renderInlineActions(targetId, compact = false) {
+  return `
+    <span class="inline-actions ${compact ? "inline-actions--compact" : ""}">
+      <span class="action-menu">
+        <button class="action-menu-trigger" type="button" data-action-menu-toggle aria-haspopup="menu" aria-expanded="false" aria-label="この項目の操作">…</button>
+        <span class="action-menu-popover" role="menu" hidden>
+          <button class="action-menu-item" type="button" role="menuitem" data-compose="edit" data-target-id="${targetId}"><span aria-hidden="true">＋</span>変更を提案</button>
+          <button class="action-menu-item" type="button" role="menuitem" data-compose="comment" data-target-id="${targetId}"><span aria-hidden="true">◌</span>コメント</button>
+        </span>
+      </span>
+    </span>`;
+}
+
+function getComments(targetId) {
+  return state.comments.filter((comment) => comment.targetId === targetId);
+}
+
+function renderCommentCount(targetId) {
+  const count = getComments(targetId).length;
+  return count ? `<span class="comment-count" title="コメント${count}件">◌ ${count}</span>` : "";
+}
+
+function renderComments(targetId) {
+  const comments = getComments(targetId);
+  if (!comments.length) return "";
+  return `
+    <div class="comment-thread">
+      ${comments
+        .map(
+          (comment) => `
+            <div class="comment-item">
+              <span class="comment-avatar">${escapeHtml(comment.author.initial)}</span>
+              <div><strong>${escapeHtml(comment.author.name)}</strong><p>${escapeHtml(comment.text)}</p></div>
+            </div>`,
+        )
+        .join("")}
+    </div>`;
+}
+
+function bindContentEvents() {
+  contentRoot.querySelectorAll("details[data-state-id]").forEach((details) => {
+    const summary = details.querySelector(":scope > summary");
+    summary?.addEventListener("click", () => {
+      if (!details.open) closeOpenSiblings(details);
+    });
+
     details.addEventListener("toggle", () => {
-      if (details.open) state.openCards.add(details.dataset.cardId);
-      else state.openCards.delete(details.dataset.cardId);
-      persistOpenCards();
+      const collection = details.dataset.stateKind === "card" ? state.openCards : state.openResponses;
+      if (details.open) collection.add(details.dataset.stateId);
+      else collection.delete(details.dataset.stateId);
+      persistOpenState();
       updateOpenCount();
     });
   });
 
-  contentRoot.querySelectorAll("[data-result-document]").forEach((button) => {
-    button.addEventListener("click", () => selectDocument(button.dataset.resultDocument));
+  contentRoot.querySelectorAll("[data-action-menu-toggle]").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      toggleActionMenu(button);
+    });
+  });
+
+  contentRoot.querySelectorAll("[data-compose]").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      closeActionMenus();
+      openComposer(button.dataset.compose, button.dataset.targetId);
+    });
+  });
+
+}
+
+function closeOpenSiblings(activeDetails) {
+  const parent = activeDetails.parentElement;
+  if (!parent) return;
+
+  [...parent.children].forEach((sibling) => {
+    if (
+      sibling !== activeDetails &&
+      sibling.tagName === "DETAILS" &&
+      sibling.dataset.stateKind === activeDetails.dataset.stateKind &&
+      sibling.open
+    ) {
+      sibling.open = false;
+    }
+  });
+}
+
+function toggleActionMenu(trigger) {
+  const menu = trigger.closest(".action-menu");
+  const popover = menu?.querySelector(".action-menu-popover");
+  if (!menu || !popover) return;
+  const shouldOpen = popover.hidden;
+  closeActionMenus(menu);
+  if (!shouldOpen) {
+    popover.hidden = true;
+    trigger.setAttribute("aria-expanded", "false");
+    return;
+  }
+
+  popover.hidden = false;
+  trigger.setAttribute("aria-expanded", "true");
+  positionActionMenu(trigger, popover);
+}
+
+function positionActionMenu(trigger, popover) {
+  const gutter = 8;
+  const gap = 6;
+  const triggerRect = trigger.getBoundingClientRect();
+  const popoverRect = popover.getBoundingClientRect();
+  const left = Math.min(
+    Math.max(gutter, triggerRect.right - popoverRect.width),
+    window.innerWidth - popoverRect.width - gutter,
+  );
+  const fitsBelow = triggerRect.bottom + gap + popoverRect.height <= window.innerHeight - gutter;
+  const top = fitsBelow ? triggerRect.bottom + gap : Math.max(gutter, triggerRect.top - popoverRect.height - gap);
+  popover.style.left = `${left}px`;
+  popover.style.top = `${top}px`;
+}
+
+function closeActionMenus(exceptMenu = null) {
+  contentRoot.querySelectorAll(".action-menu-popover:not([hidden])").forEach((popover) => {
+    const menu = popover.closest(".action-menu");
+    if (menu === exceptMenu) return;
+    popover.hidden = true;
+    menu?.querySelector("[data-action-menu-toggle]")?.setAttribute("aria-expanded", "false");
   });
 }
 
 function setAllVisible(shouldOpen) {
-  contentRoot.querySelectorAll("details[data-card-id]").forEach((details) => {
+  contentRoot.querySelectorAll("details[data-state-id]").forEach((details) => {
     details.open = shouldOpen;
-    if (shouldOpen) state.openCards.add(details.dataset.cardId);
-    else state.openCards.delete(details.dataset.cardId);
+    const collection = details.dataset.stateKind === "card" ? state.openCards : state.openResponses;
+    if (shouldOpen) collection.add(details.dataset.stateId);
+    else collection.delete(details.dataset.stateId);
   });
-  persistOpenCards();
+  persistOpenState();
   updateOpenCount();
 }
 
-function persistOpenCards() {
+function persistOpenState() {
   localStorage.setItem(STORAGE_KEYS.openCards, JSON.stringify([...state.openCards]));
+  localStorage.setItem(STORAGE_KEYS.openResponses, JSON.stringify([...state.openResponses]));
 }
 
 function updateOpenCount() {
-  const visibleCards = [...contentRoot.querySelectorAll("details[data-card-id]")];
+  const visibleCards = [...contentRoot.querySelectorAll("details[data-state-id]")];
   const visibleOpen = visibleCards.filter((details) => details.open).length;
   openCount.textContent = `${visibleOpen} / ${visibleCards.length}件を展開中`;
 }
 
-function decorateText(text) {
-  const tokenPattern = /(\b[1-7](?:NT|[CDHSX])\b|\b(?:NT|NAT|ART|FG|INV|NF|CTRL|SPL|RKCB|HCP)\b|S\/O|F1|F2|♣|♦|♥|♠)/gi;
+function openComposer(mode, targetId) {
+  const target = state.targetIndex.get(targetId);
+  if (!target) return;
+  state.composerMode = mode;
+  state.composerTargetId = targetId;
+  document.querySelector("#composer-target-label").innerHTML = decorateText(target.label, target.label);
+  const isComment = mode === "comment";
+  document.querySelector("#composer-kicker").textContent = isComment ? "COMMENT" : "PROPOSAL";
+  document.querySelector("#composer-title").textContent = isComment ? "相手にコメントする" : "変更を提案に追加";
+  document.querySelector("#edit-fields").hidden = isComment;
+  document.querySelector("#composer-preview-block").hidden = isComment;
+  document.querySelector("#save-composer").textContent = isComment ? "コメントを追加" : "ドラフトに追加";
+  document.querySelector("#composer-body-label").textContent = "修正後の内容";
+  editMode.value = "replace";
+  composerBody.value = isComment ? "" : target.text;
+  composerBody.placeholder = isComment ? "例：このレスポンスだと強さの範囲が曖昧では？" : "修正後のシステム内容";
+  renderComposerPreview();
+  composerDialog.showModal();
+  composerBody.focus();
+}
+
+function closeComposer() {
+  composerDialog.close();
+  state.composerTargetId = null;
+}
+
+function updateEditMode() {
+  const target = state.targetIndex.get(state.composerTargetId);
+  const isAppend = editMode.value === "append";
+  document.querySelector("#composer-body-label").textContent = isAppend ? "追加するレスポンスと意味" : "修正後の内容";
+  composerBody.value = isAppend ? "" : target?.text || "";
+  composerBody.placeholder = isAppend ? "例：2S  C5S4, INV+" : "修正後のシステム内容";
+  renderComposerPreview();
+  composerBody.focus();
+}
+
+function renderComposerPreview() {
+  if (state.composerMode === "comment") return;
+  const target = state.targetIndex.get(state.composerTargetId);
+  const preview = document.querySelector("#composer-preview");
+  if (!target || !preview) return;
+  const value = composerBody.value.trim();
+  if (!value) {
+    preview.innerHTML = `<span class="preview-placeholder">入力すると、実際の色と記号でここに表示されます。</span>`;
+    return;
+  }
+  const isAppend = editMode.value === "append";
+  preview.innerHTML = `
+    ${isAppend ? `<div class="preview-context">${decorateText(target.label, target.label)}</div><span class="preview-arrow">↓ 追加</span>` : ""}
+    <div class="preview-result">${decorateText(value, `${target.label} ; ${value}`)}</div>`;
+}
+
+function saveComposer(event) {
+  event.preventDefault();
+  const target = state.targetIndex.get(state.composerTargetId);
+  const value = composerBody.value.trim();
+  if (!target || !value) return;
+  const author = PREVIEW_USERS[state.previewUserIndex];
+
+  if (state.composerMode === "comment") {
+    state.comments.push({ id: crypto.randomUUID(), targetId: target.id, author, text: value });
+    state.openCards.add(target.cardId);
+    if (target.topNodeId) state.openResponses.add(target.topNodeId);
+    showToast(`${author.name}のコメントを追加しました（テスト表示）`);
+  } else {
+    state.draftChanges.push({
+      id: crypto.randomUUID(),
+      targetId: target.id,
+      documentId: target.documentId,
+      path: target.path,
+      targetLabel: target.label,
+      mode: editMode.value,
+      before: target.text,
+      after: value,
+      author,
+    });
+    showToast("変更を提案ドラフトに追加しました");
+  }
+
+  persistOpenState();
+  composerDialog.close();
+  render();
+  renderDraftDrawer();
+}
+
+function openDrawer() {
+  proposalDrawer.setAttribute("aria-hidden", "false");
+  drawerBackdrop.hidden = false;
+  document.body.classList.add("drawer-open");
+  renderDraftDrawer();
+}
+
+function closeDrawer() {
+  proposalDrawer.setAttribute("aria-hidden", "true");
+  drawerBackdrop.hidden = true;
+  document.body.classList.remove("drawer-open");
+}
+
+function renderDraftDrawer() {
+  const count = state.draftChanges.length;
+  document.querySelector("#draft-count").textContent = count;
+  document.querySelector("#mobile-draft-count").textContent = count;
+  document.querySelector("#drawer-draft-count").textContent = `${count}件`;
+  const list = document.querySelector("#draft-list");
+  if (!count) {
+    list.innerHTML = `<div class="draft-empty"><span>＋</span><p>各項目の「変更」から、複数の修正をここにまとめられます。</p></div>`;
+    return;
+  }
+  list.innerHTML = state.draftChanges
+    .map(
+      (change, index) => `
+        <article class="draft-item">
+          <header><span>${index + 1}</span><strong>${escapeHtml(change.documentId)} / ${escapeHtml(change.mode === "append" ? "レスポンス追加" : "内容修正")}</strong>
+            <button type="button" data-remove-draft="${change.id}" aria-label="この変更を削除">×</button></header>
+          <p class="draft-target">${decorateText(change.targetLabel, change.targetLabel)}</p>
+          ${change.mode === "replace" ? `<del>${decorateText(change.before, change.targetLabel)}</del>` : ""}
+          <ins>${change.mode === "append" ? "＋ " : ""}${decorateText(change.after, `${change.targetLabel} ; ${change.after}`)}</ins>
+        </article>`,
+    )
+    .join("");
+  list.querySelectorAll("[data-remove-draft]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.draftChanges = state.draftChanges.filter((change) => change.id !== button.dataset.removeDraft);
+      renderDraftDrawer();
+    });
+  });
+}
+
+function switchPreviewUser() {
+  state.previewUserIndex = (state.previewUserIndex + 1) % PREVIEW_USERS.length;
+  updatePreviewUser();
+  showToast(`${PREVIEW_USERS[state.previewUserIndex].name}の画面に切り替えました`);
+}
+
+function updatePreviewUser() {
+  const user = PREVIEW_USERS[state.previewUserIndex];
+  const chip = document.querySelector("#preview-user");
+  chip.querySelector(".account-avatar").textContent = user.initial;
+  chip.querySelector("strong").textContent = user.name;
+  document.querySelector("#drawer-preview-user").textContent = `${user.name}で確認`;
+}
+
+let toastTimer;
+function showToast(message) {
+  const toast = document.querySelector("#toast");
+  toast.textContent = message;
+  toast.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toast.hidden = true;
+  }, 2600);
+}
+
+function decorateText(text, context = "") {
+  const tokenPattern = /(\b[1-7]OM\b|\b[1-7](?:NT|[CDHSX])\b|[CDHS]\d+\+?|\bM\d+\+?\b|\bOM\b|\b(?:NT|NAT|ART|FG|INV|NF|CTRL|SPL|RKCB|HCP)\b|S\/O|F1|F2|♣|♦|♥|♠)/g;
   return String(text)
     .split(tokenPattern)
     .map((part) => {
       if (!part) return "";
-      const upper = part.toUpperCase();
-      const suitClass = getSuitClass(upper);
-      if (suitClass) return `<span class="bid-token ${suitClass}">${escapeHtml(formatBid(part))}</span>`;
-      if (/^(NAT|ART|FG|INV|NF|CTRL|SPL|RKCB|HCP|S\/O|F1|F2)$/i.test(part)) {
+      if (/^[1-7]?OM$/.test(part)) return renderOtherMajor(part, context);
+      const suitClass = getSuitClass(part);
+      if (suitClass) return `<span class="bid-token ${suitClass}">${escapeHtml(formatBridgeToken(part))}</span>`;
+      if (/^M\d+\+?$/.test(part)) {
+        return `<span class="bid-token suit-major" title="Major suit: Hearts または Spades">${escapeHtml(part)}</span>`;
+      }
+      if (/^(NAT|ART|FG|INV|NF|CTRL|SPL|RKCB|HCP|S\/O|F1|F2)$/.test(part)) {
         return `<span class="term-token">${escapeHtml(part)}</span>`;
       }
       return escapeHtml(part);
@@ -521,22 +1002,44 @@ function decorateText(text) {
     .join("");
 }
 
+function renderOtherMajor(token, context) {
+  const otherSuit = resolveOtherMajor(context.replace(token, ""));
+  const level = token.match(/^([1-7])/)?.[1] || "";
+  if (!otherSuit) {
+    return `<span class="bid-token suit-major" title="OM = Other Major（もう一方のメジャー）">${escapeHtml(token)}<small>other major</small></span>`;
+  }
+  const symbol = otherSuit === "H" ? "♥" : "♠";
+  const suitClass = otherSuit === "H" ? "suit-heart" : "suit-spade";
+  const explanation = otherSuit === "H" ? "Spades に対する Other Major = Hearts" : "Hearts に対する Other Major = Spades";
+  return `<span class="bid-token ${suitClass}" title="${explanation}">${level}${symbol}<small>OM</small></span>`;
+}
+
+function resolveOtherMajor(context) {
+  const matches = [...String(context).matchAll(/(?:[1-7]([HS])\b|([HS])\d+\+?)/g)];
+  const reference = matches.at(-1)?.[1] || matches.at(-1)?.[2];
+  if (reference === "S") return "H";
+  if (reference === "H") return "S";
+  return null;
+}
+
 function getSuitClass(token) {
-  if (token.includes("♣") || /\dC$/.test(token)) return "suit-club";
-  if (token.includes("♦") || /\dD$/.test(token)) return "suit-diamond";
-  if (token.includes("♥") || /\dH$/.test(token)) return "suit-heart";
-  if (token.includes("♠") || /\dS$/.test(token)) return "suit-spade";
+  if (token.includes("♣") || /(?:\dC$|^C\d)/.test(token)) return "suit-club";
+  if (token.includes("♦") || /(?:\dD$|^D\d)/.test(token)) return "suit-diamond";
+  if (token.includes("♥") || /(?:\dH$|^H\d)/.test(token)) return "suit-heart";
+  if (token.includes("♠") || /(?:\dS$|^S\d)/.test(token)) return "suit-spade";
   if (/\dNT$/.test(token) || token === "NT") return "suit-notrump";
   if (/\dX$/.test(token)) return "suit-double";
   return "";
 }
 
-function formatBid(token) {
+function formatBridgeToken(token) {
+  const symbols = { C: "♣", D: "♦", H: "♥", S: "♠" };
+  if (/^[CDHS]\d/.test(token)) return `${symbols[token[0]]}${token.slice(1)}`;
   return token
-    .replace(/(\d)C$/i, "$1♣")
-    .replace(/(\d)D$/i, "$1♦")
-    .replace(/(\d)H$/i, "$1♥")
-    .replace(/(\d)S$/i, "$1♠");
+    .replace(/(\d)C$/, "$1♣")
+    .replace(/(\d)D$/, "$1♦")
+    .replace(/(\d)H$/, "$1♥")
+    .replace(/(\d)S$/, "$1♠");
 }
 
 function escapeHtml(value) {
