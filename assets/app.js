@@ -983,23 +983,54 @@ function showToast(message) {
 }
 
 function decorateText(text, context = "") {
-  const tokenPattern = /(\b[1-7]OM\b|\b[1-7](?:NT|[CDHSX])\b|[CDHS]\d+\+?|\bM\d+\+?\b|\bOM\b|\b(?:NT|NAT|ART|FG|INV|NF|CTRL|SPL|RKCB|HCP)\b|S\/O|F1|F2|♣|♦|♥|♠)/g;
+  const tokenPattern = /(\b[1-7]OM\b|\b[1-7](?:NT|[CDHSX])\b|[1-7][♣♦♥♠]|[CDHS♣♦♥♠]\s*\d+(?:\s*(?:~|〜|-|–)\s*\d+|\s*\+)?|\d+\+?\s*cards?\s+(?:Clubs?|Diamonds?|Hearts?|Spades?)|[CDHS♣♦♥♠]\s+(?:Singleton|Void)|\b(?:Clubs?|Diamonds?|Hearts?|Spades?)\b|\bM\d+\+?\b|\bOM\b|\b(?:NT|NAT|ART|FG|INV|NF|CTRL|SPL|RKCB|HCP)\b|S\/O|F1|F2|♣|♦|♥|♠)/gi;
   return String(text)
     .split(tokenPattern)
     .map((part) => {
       if (!part) return "";
-      if (/^[1-7]?OM$/.test(part)) return renderOtherMajor(part, context);
+      if (/^[1-7]?OM$/i.test(part)) return renderOtherMajor(part.toUpperCase(), context);
+      if (isSuitHoldingToken(part)) return renderSuitHolding(part);
       const suitClass = getSuitClass(part);
       if (suitClass) return `<span class="bid-token ${suitClass}">${escapeHtml(formatBridgeToken(part))}</span>`;
-      if (/^M\d+\+?$/.test(part)) {
+      if (/^M\d+\+?$/i.test(part)) {
         return `<span class="bid-token suit-major" title="Major suit: Hearts または Spades">${escapeHtml(part)}</span>`;
       }
-      if (/^(NAT|ART|FG|INV|NF|CTRL|SPL|RKCB|HCP|S\/O|F1|F2)$/.test(part)) {
+      if (/^(NAT|ART|FG|INV|NF|CTRL|SPL|RKCB|HCP|S\/O|F1|F2)$/i.test(part)) {
         return `<span class="term-token">${escapeHtml(part)}</span>`;
       }
       return escapeHtml(part);
     })
     .join("");
+}
+
+function isSuitHoldingToken(token) {
+  return (
+    /^[CDHS♣♦♥♠]\s*\d+(?:\s*(?:~|〜|-|–)\s*\d+|\s*\+)?$/i.test(token) ||
+    /^\d+\+?\s*cards?\s+(?:Clubs?|Diamonds?|Hearts?|Spades?)$/i.test(token) ||
+    /^[CDHS♣♦♥♠]\s+(?:Singleton|Void)$/i.test(token)
+  );
+}
+
+function renderSuitHolding(token) {
+  const suitClass = getSuitClass(token);
+  return `<span class="bid-token holding-token ${suitClass}" title="${escapeHtml(getHoldingTitle(token))}">${escapeHtml(formatBridgeToken(token))}</span>`;
+}
+
+function getHoldingTitle(token) {
+  const compact = token.match(/^([CDHS♣♦♥♠])\s*(\d+)(?:\s*(~|〜|-|–)\s*(\d+)|\s*(\+))?$/i);
+  if (compact) {
+    const suit = toSuitSymbol(compact[1]);
+    if (compact[4]) return `${suit} ${compact[2]}〜${compact[4]}枚`;
+    if (compact[5]) return `${suit} ${compact[2]}枚以上`;
+    return `${suit} ${compact[2]}枚`;
+  }
+
+  const written = token.match(/^(\d+\+?)\s*cards?\s+(Clubs?|Diamonds?|Hearts?|Spades?)$/i);
+  if (written) return `${toSuitSymbol(written[2])} ${written[1].replace("+", "枚以上").replace(/^(\d+)$/, "$1枚")}`;
+
+  const shortShape = token.match(/^([CDHS♣♦♥♠])\s+(Singleton|Void)$/i);
+  if (shortShape) return `${toSuitSymbol(shortShape[1])} ${shortShape[2]}`;
+  return token;
 }
 
 function renderOtherMajor(token, context) {
@@ -1023,23 +1054,44 @@ function resolveOtherMajor(context) {
 }
 
 function getSuitClass(token) {
-  if (token.includes("♣") || /(?:\dC$|^C\d)/.test(token)) return "suit-club";
-  if (token.includes("♦") || /(?:\dD$|^D\d)/.test(token)) return "suit-diamond";
-  if (token.includes("♥") || /(?:\dH$|^H\d)/.test(token)) return "suit-heart";
-  if (token.includes("♠") || /(?:\dS$|^S\d)/.test(token)) return "suit-spade";
-  if (/\dNT$/.test(token) || token === "NT") return "suit-notrump";
-  if (/\dX$/.test(token)) return "suit-double";
+  if (token.includes("♣") || /(?:\dC$|^C(?:\s*\d|\s+(?:singleton|void))|clubs?)/i.test(token)) return "suit-club";
+  if (token.includes("♦") || /(?:\dD$|^D(?:\s*\d|\s+(?:singleton|void))|diamonds?)/i.test(token)) return "suit-diamond";
+  if (token.includes("♥") || /(?:\dH$|^H(?:\s*\d|\s+(?:singleton|void))|hearts?)/i.test(token)) return "suit-heart";
+  if (token.includes("♠") || /(?:\dS$|^S(?:\s*\d|\s+(?:singleton|void))|spades?)/i.test(token)) return "suit-spade";
+  if (/\dNT$/i.test(token) || /^NT$/i.test(token)) return "suit-notrump";
+  if (/\dX$/i.test(token)) return "suit-double";
   return "";
 }
 
 function formatBridgeToken(token) {
-  const symbols = { C: "♣", D: "♦", H: "♥", S: "♠" };
-  if (/^[CDHS]\d/.test(token)) return `${symbols[token[0]]}${token.slice(1)}`;
+  const compact = token.match(/^([CDHS♣♦♥♠])\s*(\d+)(?:\s*(?:~|〜|-|–)\s*(\d+)|\s*(\+))?$/i);
+  if (compact) {
+    const suffix = compact[3] ? `–${compact[3]}` : compact[4] || "";
+    return `${toSuitSymbol(compact[1])}${compact[2]}${suffix}`;
+  }
+
+  const written = token.match(/^(\d+\+?)\s*cards?\s+(Clubs?|Diamonds?|Hearts?|Spades?)$/i);
+  if (written) return `${toSuitSymbol(written[2])}${written[1]}`;
+
+  const shortShape = token.match(/^([CDHS♣♦♥♠])\s+(Singleton|Void)$/i);
+  if (shortShape) return `${toSuitSymbol(shortShape[1])} ${shortShape[2].toLowerCase()}`;
+
+  if (/^(?:Clubs?|Diamonds?|Hearts?|Spades?)$/i.test(token)) return toSuitSymbol(token);
+
   return token
-    .replace(/(\d)C$/, "$1♣")
-    .replace(/(\d)D$/, "$1♦")
-    .replace(/(\d)H$/, "$1♥")
-    .replace(/(\d)S$/, "$1♠");
+    .replace(/(\d)C$/i, "$1♣")
+    .replace(/(\d)D$/i, "$1♦")
+    .replace(/(\d)H$/i, "$1♥")
+    .replace(/(\d)S$/i, "$1♠");
+}
+
+function toSuitSymbol(value) {
+  const normalized = String(value).trim().toUpperCase();
+  if (normalized === "C" || normalized === "CLUB" || normalized === "CLUBS" || normalized === "♣") return "♣";
+  if (normalized === "D" || normalized === "DIAMOND" || normalized === "DIAMONDS" || normalized === "♦") return "♦";
+  if (normalized === "H" || normalized === "HEART" || normalized === "HEARTS" || normalized === "♥") return "♥";
+  if (normalized === "S" || normalized === "SPADE" || normalized === "SPADES" || normalized === "♠") return "♠";
+  return value;
 }
 
 function escapeHtml(value) {
