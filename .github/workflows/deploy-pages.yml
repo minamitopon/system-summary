@@ -1,4 +1,4 @@
-name: Deploy system notes to GitHub Pages
+name: Publish system notes to GitHub Pages
 
 on:
   push:
@@ -6,31 +6,31 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: pages
   cancel-in-progress: true
 
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  publish:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
       - name: Build static site
         run: ./scripts/build-site.sh
-      - name: Upload site
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: _site
-      - name: Deploy
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Publish gh-pages branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin gh-pages:gh-pages
+          git worktree add /tmp/system-summary-pages gh-pages
+          find /tmp/system-summary-pages -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -R _site/. /tmp/system-summary-pages/
+          git -C /tmp/system-summary-pages add -A
+          if git -C /tmp/system-summary-pages diff --cached --quiet; then
+            exit 0
+          fi
+          git -C /tmp/system-summary-pages commit -m "Deploy ${GITHUB_SHA}"
+          git -C /tmp/system-summary-pages push origin gh-pages
