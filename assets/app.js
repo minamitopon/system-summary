@@ -187,6 +187,7 @@ async function init() {
   updatePreviewUser();
   render();
   renderDraftDrawer();
+  scrollToRequestedTopic("auto");
 }
 
 function getInitialDocumentId() {
@@ -209,6 +210,8 @@ function parseDocument(meta, source) {
   const normalized = source.replace(/\r\n/g, "\n").trim();
   if (!normalized) return { ...meta, source: normalized, sections: [] };
 
+  if (meta.id === "competitive") return parseCompetitiveDocument(meta, normalized);
+
   const sectionPattern = /\/\*=+\*\/\s*\n([^\n]+)\s*\n\/\*=+\*\//g;
   const markers = [...normalized.matchAll(sectionPattern)];
   const sections = [];
@@ -226,6 +229,56 @@ function parseDocument(meta, source) {
       const body = normalized.slice(bodyStart, bodyEnd).trim();
       if (body) sections.push(createSection(marker[1].trim(), body, meta, sections.length));
     });
+  }
+
+  return { ...meta, source: normalized, sections };
+}
+
+function parseCompetitiveDocument(meta, normalized) {
+  const sectionPattern = /\/\*=+\*\/\s*\n([^\n]+)\s*\n\/\*=+\*\//g;
+  const markers = [...normalized.matchAll(sectionPattern)];
+  const detailMarkerIndex = markers.findIndex((marker) => marker[1].trim().toLowerCase() === "detail");
+  const overcallMarkerIndex = markers.findIndex((marker) => marker[1].trim().toLowerCase() === "overcall");
+  if (detailMarkerIndex < 0) return { ...meta, source: normalized, sections: [createSection("Notes", normalized, meta, 0)] };
+
+  const detailMarker = markers[detailMarkerIndex];
+  const detailStart = detailMarker.index + detailMarker[0].length;
+  const detailEnd = markers[detailMarkerIndex + 1]?.index ?? normalized.length;
+  const detailBody = normalized.slice(detailStart, detailEnd).trim();
+  const topicPattern = /^(\d+),\s*(.+)$/gm;
+  const topicMarkers = [...detailBody.matchAll(topicPattern)];
+  const topics = topicMarkers.map((marker, index) => {
+    const bodyStart = marker.index + marker[0].length;
+    const bodyEnd = topicMarkers[index + 1]?.index ?? detailBody.length;
+    return {
+      number: marker[1],
+      title: marker[2].trim(),
+      body: detailBody.slice(bodyStart, bodyEnd).trim(),
+      anchorId: `competitive-topic-${marker[1]}`,
+    };
+  });
+
+  const sections = [
+    {
+      title: "Topics",
+      kind: "topic-index",
+      items: topics.map(({ number, title, anchorId }) => ({ number, title, anchorId })),
+      blocks: [],
+    },
+    ...topics.map((topic, index) => ({
+      ...createSection(`${topic.number}. ${topic.title}`, topic.body, meta, index + 1),
+      kind: "competitive-topic",
+      topicNumber: topic.number,
+      anchorId: topic.anchorId,
+    })),
+  ];
+
+  if (overcallMarkerIndex >= 0) {
+    const overcallMarker = markers[overcallMarkerIndex];
+    const overcallStart = overcallMarker.index + overcallMarker[0].length;
+    const overcallEnd = markers[overcallMarkerIndex + 1]?.index ?? normalized.length;
+    const overcallBody = normalized.slice(overcallStart, overcallEnd).trim();
+    if (overcallBody) sections.push(createSection("Overcall", overcallBody, meta, sections.length));
   }
 
   return { ...meta, source: normalized, sections };
@@ -426,19 +479,24 @@ function bindControls() {
   composerBody.addEventListener("input", renderComposerPreview);
 
   window.addEventListener("hashchange", () => {
-    const id = new URLSearchParams(window.location.hash.replace(/^#/, "")).get("doc");
+    const params = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const id = params.get("doc");
     if (id && DOCUMENTS.some((item) => item.id === id) && id !== state.activeDocumentId) {
       state.activeDocumentId = id;
       renderNavigation();
       render();
     }
+    scrollToRequestedTopic("smooth");
   });
 }
 
-function selectDocument(id) {
+function selectDocument(id, topicTarget = "") {
   state.activeDocumentId = id;
   localStorage.setItem(STORAGE_KEYS.activeDocument, id);
-  history.replaceState(null, "", `#doc=${encodeURIComponent(id)}`);
+  const params = new URLSearchParams({ doc: id });
+  const topicNumber = topicTarget.match(/^competitive-topic-(\d+)$/)?.[1];
+  if (topicNumber) params.set("topic", topicNumber);
+  history.replaceState(null, "", `#${params.toString()}`);
   renderNavigation();
   render();
   document.querySelector(`[data-document-id="${CSS.escape(id)}"].mobile-nav-item`)?.scrollIntoView({
@@ -447,7 +505,23 @@ function selectDocument(id) {
     inline: "center",
   });
   document.querySelector("#system-content").focus({ preventScroll: true });
-  window.scrollTo({ top: document.querySelector(".toolbar-wrap").offsetTop, behavior: "smooth" });
+  if (topicTarget) {
+    requestAnimationFrame(() => scrollToTopic(topicTarget, "smooth"));
+  } else {
+    window.scrollTo({ top: document.querySelector(".toolbar-wrap").offsetTop, behavior: "smooth" });
+  }
+}
+
+function scrollToRequestedTopic(behavior = "smooth") {
+  const params = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+  const topicNumber = params.get("topic");
+  if (params.get("doc") === "competitive" && topicNumber) {
+    requestAnimationFrame(() => scrollToTopic(`competitive-topic-${topicNumber}`, behavior));
+  }
+}
+
+function scrollToTopic(targetId, behavior = "smooth") {
+  document.getElementById(targetId)?.scrollIntoView({ behavior, block: "start" });
 }
 
 function moveDocument(direction) {
@@ -498,6 +572,7 @@ function renderDocumentBody(documentData) {
 }
 
 function renderSection(section, documentData) {
+  if (section.kind === "topic-index") return renderTopicIndex(section);
   if (section.title.toLowerCase() === "overview") {
     return renderOpeningOverview(section, documentData);
   }
@@ -505,17 +580,52 @@ function renderSection(section, documentData) {
   const visibleBlocks = section.blocks.filter(
     (card) => !state.embeddedCardIds.has(card.id) && !isSystemMemo(card),
   );
+  const sectionId = section.anchorId ? ` id="${escapeHtml(section.anchorId)}"` : "";
   const biddingSection = visibleBlocks.length
     ? `
-      <section class="note-section">
+      <section class="note-section${section.kind === "competitive-topic" ? " competitive-topic-section" : ""}"${sectionId}>
         <div class="section-heading">
           <span></span><h3>${escapeHtml(section.title)}</h3><small>${visibleBlocks.length} topics</small>
         </div>
-        <div class="card-stack">${visibleBlocks.map((card) => renderCard(card, documentData)).join("")}</div>
+        <div class="card-stack">${visibleBlocks
+          .map((card) => (isCompetitiveSubheading(section, card) ? renderCompetitiveSubheading(card) : renderCard(card, documentData)))
+          .join("")}</div>
       </section>`
     : "";
 
   return `${biddingSection}${memoBlocks.length ? renderMemoSection(memoBlocks) : ""}`;
+}
+
+function renderTopicIndex(section) {
+  return `
+    <section class="note-section topic-index-section">
+      <div class="section-heading">
+        <span></span><h3>Topics</h3><small>${section.items.length} sections</small>
+      </div>
+      <nav class="topic-index" aria-label="Competitive topics">
+        ${section.items
+          .map(
+            (item) => `
+              <button type="button" class="topic-index-item" data-topic-target="${escapeHtml(item.anchorId)}">
+                <span>${escapeHtml(item.number)}</span><strong>${decorateText(item.title, item.title)}</strong>
+              </button>`,
+          )
+          .join("")}
+      </nav>
+    </section>`;
+}
+
+function isCompetitiveSubheading(section, card) {
+  return section.kind === "competitive-topic" && !card.nodes.length && /^\d+-\d+\b/.test(card.title);
+}
+
+function renderCompetitiveSubheading(card) {
+  return `
+    <div class="competitive-subheading">
+      <h4>${decorateText(card.title, card.title)}</h4>
+      ${renderInlineActions(card.id, true)}
+      ${renderComments(card.id)}
+    </div>`;
 }
 
 function isSystemMemo(card) {
@@ -630,14 +740,15 @@ function renderTopResponse(node, documentData, card, forceOpen = false) {
   const context = `${card.title} ; ${node.text}`;
   const linkedCard = node.linkedCardId ? state.cardIndex.get(node.linkedCardId) : null;
   const hasChildren = node.children.length > 0 || Boolean(linkedCard?.nodes.length);
-  if (!hasChildren) return renderResponseRow(node, context, 0);
+  const conventionReference = renderConventionReference(card.title, node.text);
+  if (!hasChildren) return renderResponseRow(node, context, 0, conventionReference);
   const isOpen = forceOpen || state.openResponses.has(node.id);
 
   return `
     <details class="response-card ${linkedCard ? "response-card--linked" : ""} accent-${documentData.accent}" data-state-id="${node.id}" data-state-kind="response" ${isOpen ? "open" : ""}>
       <summary>
         <span>${decorateText(node.text, context)}</span>
-        <span class="response-summary-meta">${renderCommentCount(node.id)}${renderInlineActions(node.id, true)}<span class="chevron" aria-hidden="true"></span></span>
+        <span class="response-summary-meta">${conventionReference}${renderCommentCount(node.id)}${renderInlineActions(node.id, true)}<span class="chevron" aria-hidden="true"></span></span>
       </summary>
       <div class="response-body">
         ${renderComments(node.id)}
@@ -663,17 +774,31 @@ function renderDescendants(nodes, depth, parentContext) {
     .join("");
 }
 
-function renderResponseRow(node, context, depth) {
+function renderResponseRow(node, context, depth, conventionReference = "") {
   return `
     <div class="response-row-wrap" style="--depth:${Math.min(depth, 7)}">
       <div class="response-row">
         <span class="branch-mark" aria-hidden="true"></span>
         <span class="response-copy">${decorateText(node.text, context)}</span>
+        ${conventionReference}
         ${renderInlineActions(node.id, true)}
         ${renderCommentCount(node.id)}
       </div>
       ${renderComments(node.id)}
     </div>`;
+}
+
+function renderConventionReference(cardTitle, nodeText) {
+  const baseAuction = normalizeAuction(cardTitle);
+  const nextBid = nodeText.trim().match(/^(?:[1-7](?:NT|[CDHS]))\b/i)?.[0]?.toUpperCase();
+  const xyzAuctions = {
+    "1C1D": new Set(["1H", "1S", "1NT"]),
+    "1C1H": new Set(["1S", "1NT"]),
+    "1C1S": new Set(["1NT"]),
+  };
+  if (!nextBid || !xyzAuctions[baseAuction]?.has(nextBid)) return "";
+
+  return `<button class="convention-reference" type="button" data-document-target="competitive" data-topic-target="competitive-topic-13" title="Competitive / 13. XYZ の詳細へ">XYZ <span aria-hidden="true">↗</span></button>`;
 }
 
 function renderInlineActions(targetId, compact = false) {
@@ -745,6 +870,25 @@ function bindContentEvents() {
       event.stopPropagation();
       closeActionMenus();
       openComposer(button.dataset.compose, button.dataset.targetId);
+    });
+  });
+
+  contentRoot.querySelectorAll("[data-topic-target]").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const targetId = button.dataset.topicTarget;
+      const documentId = button.dataset.documentTarget || state.activeDocumentId;
+      if (documentId !== state.activeDocumentId) {
+        selectDocument(documentId, targetId);
+        return;
+      }
+
+      const params = new URLSearchParams({ doc: documentId });
+      const topicNumber = targetId.match(/^competitive-topic-(\d+)$/)?.[1];
+      if (topicNumber) params.set("topic", topicNumber);
+      history.replaceState(null, "", `#${params.toString()}`);
+      scrollToTopic(targetId, "smooth");
     });
   });
 
