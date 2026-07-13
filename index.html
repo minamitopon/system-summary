@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#102c3d" />
+    <link rel="icon" href="data:," />
+    <meta
+      name="description"
+      content="Takumi Seshimo と Takahiro Honda が使用するコントラクトブリッジ・システム Oklahoma のリファレンス。"
+    />
+    <title>Oklahoma System Notes</title>
+    <link rel="stylesheet" href="./assets/styles.css?v=8" />
+    <script type="module" src="./assets/app.js?v=9"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#system-content">本文へ移動</a>
+
+    <header class="site-header">
+      <div class="header-suit header-suit--club" aria-hidden="true">♣</div>
+      <div class="header-suit header-suit--diamond" aria-hidden="true">♦</div>
+      <div class="header-suit header-suit--heart" aria-hidden="true">♥</div>
+      <div class="header-suit header-suit--spade" aria-hidden="true">♠</div>
+      <div class="header-inner">
+        <p class="eyebrow">CONTRACT BRIDGE · SYSTEM NOTES</p>
+        <h1>Oklahoma</h1>
+        <p class="header-description">
+          Short Clubs with Transfer Responses
+          <span aria-hidden="true">—</span>
+          <span>Takumi Seshimo × Takahiro Honda</span>
+        </p>
+      </div>
+    </header>
+
+    <div class="toolbar-wrap">
+      <div class="toolbar" aria-label="閲覧ツール">
+        <div class="toolbar-actions">
+          <span id="open-count" class="open-count" aria-live="polite">0件を展開中</span>
+          <button id="expand-all" class="text-button" type="button">すべて開く</button>
+          <button id="collapse-all" class="text-button" type="button">すべて閉じる</button>
+          <button id="preview-user" class="account-chip" type="button" aria-label="プレビューするユーザーを切り替える">
+            <span class="account-avatar">本</span>
+            <span><small>プレビュー</small><strong>本田</strong></span>
+          </button>
+          <button id="open-proposal-drawer" class="draft-button" type="button">
+            提案ドラフト <span id="draft-count">0</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-nav-wrap">
+      <nav id="mobile-nav" class="mobile-nav" aria-label="システム項目"></nav>
+    </div>
+
+    <div class="page-shell">
+      <aside class="sidebar" aria-label="システム項目">
+        <div class="sidebar-heading">
+          <p>CONTENTS</p>
+          <span id="document-count"></span>
+        </div>
+        <nav id="sidebar-nav" class="sidebar-nav"></nav>
+      </aside>
+
+      <main id="system-content" class="content" tabindex="-1">
+        <div id="loading-state" class="loading-state" aria-live="polite">
+          <span class="loading-mark" aria-hidden="true">♣</span>
+          <p>システムノートを読み込んでいます…</p>
+        </div>
+        <div id="content-root"></div>
+      </main>
+    </div>
+
+    <div id="drawer-backdrop" class="drawer-backdrop" hidden></div>
+    <aside id="proposal-drawer" class="proposal-drawer" aria-label="提案ドラフト" aria-hidden="true">
+      <header class="drawer-header">
+        <div>
+          <p>PROPOSAL DRAFT</p>
+          <h2>まとめて提案する</h2>
+        </div>
+        <button id="close-proposal-drawer" class="icon-button" type="button" aria-label="提案ドラフトを閉じる">×</button>
+      </header>
+      <div class="integration-note">
+        <span class="integration-mark" aria-hidden="true">G</span>
+        <div>
+          <strong>GitHub連携テストモード</strong>
+          <p>複数の変更を1本のPRにまとめ、必ず提案者ではない相手が承認します。現在はPRを作成しません。</p>
+        </div>
+        <button id="drawer-preview-user" class="preview-user-button" type="button">本田で確認</button>
+      </div>
+      <label class="field-label" for="proposal-title">提案タイトル</label>
+      <input id="proposal-title" class="form-control" type="text" placeholder="例：1♣–1♦後の継続を整理" />
+      <label class="field-label" for="proposal-description">相手に伝えたいこと</label>
+      <textarea id="proposal-description" class="form-control" rows="3" placeholder="変更の意図や、確認してほしい点"></textarea>
+      <div class="draft-list-heading">
+        <h3>変更内容</h3>
+        <span id="drawer-draft-count">0件</span>
+      </div>
+      <div id="draft-list" class="draft-list"></div>
+      <footer class="drawer-footer">
+        <p>GitHubログインと2人の許可設定後に有効になります。</p>
+        <button id="submit-proposal" type="button" disabled>PRとして提案</button>
+      </footer>
+    </aside>
+
+    <dialog id="composer-dialog" class="composer-dialog">
+      <form id="composer-form" method="dialog">
+        <header>
+          <div>
+            <p id="composer-kicker">PROPOSAL</p>
+            <h2 id="composer-title">変更を提案</h2>
+          </div>
+          <button id="close-composer" class="icon-button" type="button" aria-label="閉じる">×</button>
+        </header>
+        <div class="composer-target">
+          <small>対象</small>
+          <strong id="composer-target-label"></strong>
+        </div>
+        <div id="edit-fields">
+          <label class="field-label" for="edit-mode">変更方法</label>
+          <select id="edit-mode" class="form-control">
+            <option value="replace">この内容を修正</option>
+            <option value="append">この後にレスポンスを追加</option>
+          </select>
+          <label id="composer-body-label" class="field-label" for="composer-body">修正後の内容</label>
+        </div>
+        <textarea id="composer-body" class="form-control" rows="6" required></textarea>
+        <div id="composer-preview-block" class="composer-preview-block">
+          <span class="field-label">表示プレビュー</span>
+          <div id="composer-preview" class="composer-preview" aria-live="polite"></div>
+        </div>
+        <footer>
+          <button id="cancel-composer" class="secondary-button" type="button">キャンセル</button>
+          <button id="save-composer" class="primary-button" type="submit">ドラフトに追加</button>
+        </footer>
+      </form>
+    </dialog>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+    <footer class="site-footer">
+      <p>Oklahoma System Notes</p>
+      <a href="https://github.com/minamitopon/system-summary" target="_blank" rel="noreferrer">
+        GitHubで原文を見る <span aria-hidden="true">↗</span>
+      </a>
+    </footer>
+
+    <nav class="bottom-nav" aria-label="前後の項目へ移動">
+      <button id="previous-document" type="button" aria-label="前の項目へ">
+        <span aria-hidden="true">←</span><span>前へ</span>
+      </button>
+      <button id="mobile-open-draft" type="button" aria-label="提案ドラフトを開く">
+        <span>提案</span><span id="mobile-draft-count" class="mobile-badge">0</span>
+      </button>
+      <button id="next-document" type="button" aria-label="次の項目へ">
+        <span>次へ</span><span aria-hidden="true">→</span>
+      </button>
+    </nav>
+
+    <noscript>
+      <div class="noscript-message">このリファレンスの展開表示には JavaScript が必要です。</div>
+    </noscript>
+  </body>
+</html>

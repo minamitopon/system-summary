@@ -1,0 +1,35 @@
+2D Opening
+
+/*============*/
+Overview
+/*============*/
+Both Major weak.
+Guarantee 5cards Hearts in 1st/2nd seat.
+
+
+/*============*/
+Detail
+/*============*/
+
+2D
+  - 2NT asking
+  - 3m  FG
+  - 4C  ask better M
+
+
+2D - 2NT;
+3C  min
+  - 3D  asking
+    - 3H  H5S4
+    - 3S  H5S5
+    - 3NT H6S4
+    - 4C  H6S5
+3D  H5S4, max
+3H  H5S5, max
+3S  H6S4, max
+3NT H6S5, max
+
+
+/*============*/
+vs intervention
+/*============*/
