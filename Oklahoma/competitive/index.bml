@@ -17,6 +17,8 @@ Index
 12, Forcing Pass
 13, XYZ
 14, Leaping Michaels
+15, Negative Double
+16, vs Preemptive
 
 /*============*/
 Detail
@@ -305,6 +307,67 @@ P - 1X;
 1m - (PRE) - X - (P);
 any - (P) -
 new suit = NAT, NF
+
+16, vs Preemptive
+
+(2H) - 3C - (P) -
+3D  catch all, F1
+  - 3H  S4
+    - 3S  ask stopper
+    - 3NT have stopper
+    - 4C  S/T
+    - 4D  NAT
+    - 4H  S4, Good
+    - 4S  S4, NF
+  - 3S  ask stopper
+    - 3NT have stopper
+3H  S5+
+  - 3S  ask stopper
+    - 3NT have stopper
+    - 4H  S3+, Good
+    - 4S  S3+, NF
+3S  D5+, Good
+3NT play
+
+(2H) - 3D - (P) -
+3H  S4+
+  - 3S  ask stopper
+    - 3NT have stopper
+  - 3NT have stopper, may have S3
+  - 4m  NAT
+  - 4H  S4, Good
+  - 4S  S4, NF
+3S  ask stopper
+3NT play
+
+(2S) - 3C - (P) -
+3D  catch all, F1
+  - 3H  H4
+    - 3S  ask stopper
+      - 3NT have stopper
+      - 4C S/T
+      - 4D H4, Good
+      - 4H H4, NF
+  - 3S  ask stopper
+    - 3NT have stopper
+  - 3H  H5+
+    - 3S  ask stopper
+      - 3NT have stopper
+    - 4D H3+, Good
+    - 4H H3+, NF
+  - 3S  D5+, Good
+  - 3NT play
+
+
+(2S) - 3D - (P) -
+3H  H4+
+  - 3S  ask stopper
+    - 3NT have stopper
+  - 3NT have stopper, may have H3
+  - 4C H4, Good
+  - 4H H4, NF
+3S  ask stopper
+3NT play
 
 /*============*/
 Overcall
