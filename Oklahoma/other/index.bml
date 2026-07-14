@@ -56,3 +56,51 @@ ACOL 4NT
 6C  color
 6D  rank
 6H  shape
+
+/*============*/
+2way Game Try
+/*============*/
+1H - 2H
+2S  pup to 2NT
+	- 2NT accept
+		- 3C  0-1 clubs
+		- 3D	0-1 diamonds
+		- 3H	0-1 spades
+	- 3C  min, value
+	- 3D  min, value
+	- 3H  min, value in major
+2NT poor clubs
+3C  balanced
+	- 3D  pup to 3H
+	- 3H  suggest your 3NT
+	- 3NT suggest my 3NT
+3D	poor diamonds
+3H	poor spades
+
+
+1S - 2S
+2NT pup to 3C
+	- 3C accept
+		- 3D	0-1 Clubs
+		- 3H	0-1 Diamonds
+		- 3S  0-1 Hearts
+	- 3D  min, value
+	- 3H  min, value
+	- 3S  min, value in blacks
+3C  poor Clubs
+3D  balanced
+	- 3H  pup to 3S
+	- 3S  suggest your 3NT
+	- 3NT suggest my 3NT
+3H	poor Diamonds
+3S  poor Hearts
+
+
+1m - 1M
+2M -
+same as above
+
+"Poor suit" means a suit of three or more cards that will probably contain at least two losers.
+It typically refers to holdings like Qxx.
+Therefore, invitations that are hard to classify are treated as balanced.
+Making 3M a "suggest your 3NT" is used to avoid a lead‑showing double.
