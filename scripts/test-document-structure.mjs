@@ -12,6 +12,12 @@ function parse(id, file) {
   );
 }
 
+for (const opening of ["1C", "1D", "1H", "1S", "1NT", "2C", "2D", "2M", "2NT", "3NT"]) {
+  const document = parse(opening, opening);
+  assert.equal(document.sections.some((section) => section.title === "Summary"), false, opening);
+  assert.equal(document.sections[0]?.title, "Overview", opening);
+}
+
 const competitive = parse("competitive", "competitive");
 assert.equal(competitive.sections[0].kind, "topic-index");
 assert.equal(competitive.sections[0].items.length, 15);
