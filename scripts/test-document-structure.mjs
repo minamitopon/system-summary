@@ -26,6 +26,20 @@ assert.deepEqual(
   ["2-1 Lebensohl", "Situation", "2NT Pup to 3C", "2-2 Rubensohl", "Situation", "2NT TRF, Clubs"],
 );
 
+const competitiveRenderBranch = appSource.slice(
+  appSource.indexOf("function renderSection"),
+  appSource.indexOf("function renderTopicIndex"),
+);
+assert.match(competitiveRenderBranch, /documentData\.id === "competitive"/);
+assert.match(competitiveRenderBranch, /renderExpandedCard\(card, documentData\)/);
+
+const expandedCardSource = appSource.slice(
+  appSource.indexOf("function renderExpandedCard"),
+  appSource.indexOf("function renderTopResponse"),
+);
+assert.match(expandedCardSource, /renderDescendants\(card\.nodes, 0, card\.title\)/);
+assert.doesNotMatch(expandedCardSource, /<details|<summary/);
+
 const other = parse("other", "other");
 assert.deepEqual(
   other.sections.map((section) => section.title),

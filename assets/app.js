@@ -540,6 +540,7 @@ function renderActiveDocument() {
   const documentData = state.documents.get(state.activeDocumentId);
   if (!documentData) return "";
   const totalCards = documentData.sections.reduce((count, section) => count + section.blocks.length, 0);
+  const isAlwaysExpanded = documentData.id === "competitive";
 
   return `
     <article class="document-view accent-${documentData.accent}">
@@ -555,7 +556,11 @@ function renderActiveDocument() {
       </header>
       <div class="document-stats" aria-label="文書情報">
         <span><strong>${totalCards}</strong> topics</span>
-        <span>1段目でレスポンス一覧、2段目でその先を表示します</span>
+        <span>${
+          isAlwaysExpanded
+            ? "Competitiveは全内容を表示しています"
+            : "1段目でレスポンス一覧、2段目でその先を表示します"
+        }</span>
       </div>
       ${renderDocumentBody(documentData)}
     </article>`;
@@ -588,7 +593,11 @@ function renderSection(section, documentData) {
           <span></span><h3>${escapeHtml(section.title)}</h3><small>${visibleBlocks.length} topics</small>
         </div>
         <div class="card-stack">${visibleBlocks
-          .map((card) => (isCompetitiveSubheading(section, card) ? renderCompetitiveSubheading(card) : renderCard(card, documentData)))
+          .map((card) => {
+            if (isCompetitiveSubheading(section, card)) return renderCompetitiveSubheading(card);
+            if (documentData.id === "competitive") return renderExpandedCard(card, documentData);
+            return renderCard(card, documentData);
+          })
           .join("")}</div>
       </section>`
     : "";
@@ -734,6 +743,26 @@ function renderCard(card, documentData, options = {}) {
         </div>
       </div>
     </details>`;
+}
+
+function renderExpandedCard(card, documentData) {
+  const comments = renderComments(card.id);
+  const body = comments || card.nodes.length
+    ? `
+      <div class="card-body expanded-card-body">
+        ${comments}
+        ${card.nodes.length ? `<div class="response-list">${renderDescendants(card.nodes, 0, card.title)}</div>` : ""}
+      </div>`
+    : "";
+
+  return `
+    <article class="system-card system-card--expanded accent-${documentData.accent}">
+      <header class="expanded-card-heading">
+        <span class="summary-copy">${decorateText(card.title, card.title)}</span>
+        <span class="summary-meta">${renderCommentCount(card.id)}${renderInlineActions(card.id, true)}</span>
+      </header>
+      ${body}
+    </article>`;
 }
 
 function renderTopResponse(node, documentData, card, forceOpen = false) {
