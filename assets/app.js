@@ -219,9 +219,6 @@ function parseDocument(meta, source) {
   if (!markers.length) {
     sections.push(createSection("Notes", normalized, meta, 0));
   } else {
-    const preamble = normalized.slice(0, markers[0].index).trim();
-    if (preamble) sections.push(createSection("Summary", preamble, meta, 0));
-
     markers.forEach((marker) => {
       const bodyStart = marker.index + marker[0].length;
       const markerIndex = markers.indexOf(marker);
