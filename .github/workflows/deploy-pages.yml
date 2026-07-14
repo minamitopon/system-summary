@@ -9,8 +9,8 @@ permissions:
   contents: write
 
 concurrency:
-  group: pages
-  cancel-in-progress: true
+  group: pages-publisher
+  cancel-in-progress: false
 
 jobs:
   publish:
@@ -26,8 +26,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch origin gh-pages:gh-pages
           git worktree add /tmp/system-summary-pages gh-pages
-          find /tmp/system-summary-pages -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
-          cp -R _site/. /tmp/system-summary-pages/
+          ./scripts/sync-pages-content.sh production /tmp/system-summary-pages _site
           git -C /tmp/system-summary-pages add -A
           if git -C /tmp/system-summary-pages diff --cached --quiet; then
             exit 0

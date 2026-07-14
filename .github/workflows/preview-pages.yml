@@ -1,0 +1,78 @@
+name: Publish pull request preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, closed]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: pages-publisher
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout pull request
+        uses: actions/checkout@v4
+      - name: Build static site
+        run: ./scripts/build-site.sh
+      - name: Publish preview directory
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin gh-pages:gh-pages
+          git worktree add /tmp/system-summary-pages gh-pages
+          ./scripts/sync-pages-content.sh preview /tmp/system-summary-pages _site "${PR_NUMBER}"
+          git -C /tmp/system-summary-pages add -A "previews/pr-${PR_NUMBER}"
+          if git -C /tmp/system-summary-pages diff --cached --quiet; then
+            exit 0
+          fi
+          git -C /tmp/system-summary-pages commit -m "Preview PR #${PR_NUMBER} at ${GITHUB_SHA}"
+          git -C /tmp/system-summary-pages push origin gh-pages
+      - name: Add preview link to pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PREVIEW_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/previews/pr-${{ github.event.pull_request.number }}/
+        run: |
+          marker="<!-- system-summary-pr-preview -->"
+          body="${marker}
+
+          Preview: ${PREVIEW_URL}
+
+          このURLはPRの更新ごとに自動更新されます。"
+          comment_id="$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" --paginate --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | contains("<!-- system-summary-pr-preview -->"))) | .id' | head -n 1)"
+          if [[ -n "${comment_id}" ]]; then
+            gh api --method PATCH "repos/${GITHUB_REPOSITORY}/issues/comments/${comment_id}" -f body="${body}" >/dev/null
+          else
+            gh pr comment "${PR_NUMBER}" --repo "${GITHUB_REPOSITORY}" --body "${body}"
+          fi
+
+  cleanup:
+    if: github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Remove preview directory
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin gh-pages:gh-pages
+          git worktree add /tmp/system-summary-pages gh-pages
+          ./scripts/sync-pages-content.sh cleanup /tmp/system-summary-pages "" "${PR_NUMBER}"
+          git -C /tmp/system-summary-pages add -A "previews/pr-${PR_NUMBER}"
+          if git -C /tmp/system-summary-pages diff --cached --quiet; then
+            exit 0
+          fi
+          git -C /tmp/system-summary-pages commit -m "Remove preview for PR #${PR_NUMBER}"
+          git -C /tmp/system-summary-pages push origin gh-pages
