@@ -6,6 +6,8 @@
 
 スマートフォン対応のビューアで、2段階のオークション表示、変更をまとめる提案ドラフト、インラインコメントを確認できます。
 
+Pull Requestには `https://minamitopon.github.io/system-summary/previews/pr-<PR番号>/` 形式の確認用URLが自動で付きます。レビュー中のコードと `index.bml` を、マージ前に実際の画面で確認できます。
+
 現在、提案とコメントはブラウザ内のプレビューで、外部保存とPR作成は無効です。共同利用版の認証・PR・コメント設計は `docs/collaboration-architecture.md` を参照してください。
 
 ## ブランチルール
