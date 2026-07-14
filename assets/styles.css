@@ -864,6 +864,37 @@ a {
   outline-offset: -3px;
 }
 
+.expanded-card-heading {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 58px;
+  padding: 12px 17px 12px 19px;
+  gap: 18px;
+}
+
+.expanded-card-heading::before {
+  position: absolute;
+  top: 12px;
+  bottom: 12px;
+  left: 0;
+  width: 3px;
+  content: "";
+  background: var(--card-accent);
+  border-radius: 0 3px 3px 0;
+  opacity: 0.62;
+}
+
+.system-card--expanded {
+  border-color: color-mix(in srgb, var(--card-accent) 28%, var(--line));
+  box-shadow: none;
+}
+
+.expanded-card-body {
+  animation: none;
+}
+
 .summary-copy {
   min-width: 0;
   font-size: 0.94rem;
@@ -1927,6 +1958,12 @@ textarea.form-control {
   .system-card > summary {
     min-height: 61px;
     padding: 12px 13px 12px 16px;
+    gap: 9px;
+  }
+
+  .expanded-card-heading {
+    min-height: 56px;
+    padding: 11px 13px 11px 16px;
     gap: 9px;
   }
 
