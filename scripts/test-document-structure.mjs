@@ -12,6 +12,12 @@ function parse(id, file) {
   );
 }
 
+for (const opening of ["1C", "1D", "1H", "1S", "1NT", "2C", "2D", "2M", "2NT", "3NT"]) {
+  const document = parse(opening, opening);
+  assert.equal(document.sections.some((section) => section.title === "Summary"), false, opening);
+  assert.equal(document.sections[0]?.title, "Overview", opening);
+}
+
 const competitive = parse("competitive", "competitive");
 assert.equal(competitive.sections[0].kind, "topic-index");
 assert.equal(competitive.sections[0].items.length, 15);
@@ -26,6 +32,20 @@ assert.deepEqual(
   ["2-1 Lebensohl", "Situation", "2NT Pup to 3C", "2-2 Rubensohl", "Situation", "2NT TRF, Clubs"],
 );
 
+const competitiveRenderBranch = appSource.slice(
+  appSource.indexOf("function renderSection"),
+  appSource.indexOf("function renderTopicIndex"),
+);
+assert.match(competitiveRenderBranch, /documentData\.id === "competitive"/);
+assert.match(competitiveRenderBranch, /renderExpandedCard\(card, documentData\)/);
+
+const expandedCardSource = appSource.slice(
+  appSource.indexOf("function renderExpandedCard"),
+  appSource.indexOf("function renderTopResponse"),
+);
+assert.match(expandedCardSource, /renderDescendants\(card\.nodes, 0, card\.title\)/);
+assert.doesNotMatch(expandedCardSource, /<details|<summary/);
+
 const other = parse("other", "other");
 assert.deepEqual(
   other.sections.map((section) => section.title),
@@ -34,6 +54,30 @@ assert.deepEqual(
 
 const carding = parse("carding", "carding");
 assert.deepEqual(carding.sections.map((section) => section.title), ["Memo"]);
+
+const sectionOrderSource = appSource.slice(
+  appSource.indexOf("function isOpeningDocument"),
+  appSource.indexOf("function renderSection"),
+);
+const { getSectionsInDisplayOrder } = new Function(
+  `${sectionOrderSource}\nreturn { getSectionsInDisplayOrder };`,
+)();
+
+for (const opening of ["1C", "1H", "1S"]) {
+  const document = parse(opening, opening);
+  const titles = getSectionsInDisplayOrder(document).map((section) => section.title);
+  const expected = ["Summary", "Overview", "Detail", "In 3rd/4th seat", "vs intervention"].filter((title) =>
+    titles.includes(title),
+  );
+  assert.deepEqual(titles, expected, opening);
+}
+
+const documentBodySource = appSource.slice(
+  appSource.indexOf("function renderDocumentBody"),
+  appSource.indexOf("function isOpeningDocument"),
+);
+assert.match(documentBodySource, /sections\.flatMap\(\(section\) => section\.blocks\.filter\(isSystemMemo\)\)/);
+assert.match(documentBodySource, /renderedSections.*renderMemoSection\(memoBlocks\)/s);
 
 const normalizeSource = appSource.slice(appSource.indexOf("function normalizeAuction"), appSource.indexOf("function walkNodes"));
 const referenceSource = appSource.slice(

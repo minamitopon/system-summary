@@ -219,9 +219,6 @@ function parseDocument(meta, source) {
   if (!markers.length) {
     sections.push(createSection("Notes", normalized, meta, 0));
   } else {
-    const preamble = normalized.slice(0, markers[0].index).trim();
-    if (preamble) sections.push(createSection("Summary", preamble, meta, 0));
-
     markers.forEach((marker) => {
       const bodyStart = marker.index + marker[0].length;
       const markerIndex = markers.indexOf(marker);
@@ -540,6 +537,7 @@ function renderActiveDocument() {
   const documentData = state.documents.get(state.activeDocumentId);
   if (!documentData) return "";
   const totalCards = documentData.sections.reduce((count, section) => count + section.blocks.length, 0);
+  const isAlwaysExpanded = documentData.id === "competitive";
 
   return `
     <article class="document-view accent-${documentData.accent}">
@@ -555,7 +553,11 @@ function renderActiveDocument() {
       </header>
       <div class="document-stats" aria-label="文書情報">
         <span><strong>${totalCards}</strong> topics</span>
-        <span>1段目でレスポンス一覧、2段目でその先を表示します</span>
+        <span>${
+          isAlwaysExpanded
+            ? "Competitiveは全内容を表示しています"
+            : "1段目でレスポンス一覧、2段目でその先を表示します"
+        }</span>
       </div>
       ${renderDocumentBody(documentData)}
     </article>`;
@@ -568,10 +570,38 @@ function renderDocumentBody(documentData) {
   if (!documentData.sections.length) {
     return `<div class="empty-state"><span aria-hidden="true">♧</span><h3>まだノートがありません</h3><p>この項目は、原文が追加されると自動的に表示されます。</p></div>`;
   }
-  return documentData.sections.map((section) => renderSection(section, documentData)).join("");
+  const sections = getSectionsInDisplayOrder(documentData);
+  const deferMemos = isOpeningDocument(documentData);
+  const renderedSections = sections.map((section) => renderSection(section, documentData, deferMemos)).join("");
+  const memoBlocks = deferMemos ? sections.flatMap((section) => section.blocks.filter(isSystemMemo)) : [];
+  return `${renderedSections}${memoBlocks.length ? renderMemoSection(memoBlocks) : ""}`;
 }
 
-function renderSection(section, documentData) {
+function isOpeningDocument(documentData) {
+  return !["competitive", "carding", "other"].includes(documentData.id);
+}
+
+function getSectionsInDisplayOrder(documentData) {
+  if (!isOpeningDocument(documentData)) return documentData.sections;
+  const priority = new Map([
+    ["summary", 0],
+    ["overview", 10],
+    ["detail", 20],
+    ["in 3rd/4th seat", 30],
+    ["vs intervention", 40],
+  ]);
+
+  return documentData.sections
+    .map((section, index) => ({ section, index }))
+    .sort((left, right) => {
+      const leftPriority = priority.get(left.section.title.trim().toLowerCase()) ?? 35;
+      const rightPriority = priority.get(right.section.title.trim().toLowerCase()) ?? 35;
+      return leftPriority - rightPriority || left.index - right.index;
+    })
+    .map(({ section }) => section);
+}
+
+function renderSection(section, documentData, deferMemos = false) {
   if (section.kind === "topic-index") return renderTopicIndex(section);
   if (section.title.toLowerCase() === "overview") {
     return renderOpeningOverview(section, documentData);
@@ -588,12 +618,16 @@ function renderSection(section, documentData) {
           <span></span><h3>${escapeHtml(section.title)}</h3><small>${visibleBlocks.length} topics</small>
         </div>
         <div class="card-stack">${visibleBlocks
-          .map((card) => (isCompetitiveSubheading(section, card) ? renderCompetitiveSubheading(card) : renderCard(card, documentData)))
+          .map((card) => {
+            if (isCompetitiveSubheading(section, card)) return renderCompetitiveSubheading(card);
+            if (documentData.id === "competitive") return renderExpandedCard(card, documentData);
+            return renderCard(card, documentData);
+          })
           .join("")}</div>
       </section>`
     : "";
 
-  return `${biddingSection}${memoBlocks.length ? renderMemoSection(memoBlocks) : ""}`;
+  return `${biddingSection}${!deferMemos && memoBlocks.length ? renderMemoSection(memoBlocks) : ""}`;
 }
 
 function renderTopicIndex(section) {
@@ -734,6 +768,26 @@ function renderCard(card, documentData, options = {}) {
         </div>
       </div>
     </details>`;
+}
+
+function renderExpandedCard(card, documentData) {
+  const comments = renderComments(card.id);
+  const body = comments || card.nodes.length
+    ? `
+      <div class="card-body expanded-card-body">
+        ${comments}
+        ${card.nodes.length ? `<div class="response-list">${renderDescendants(card.nodes, 0, card.title)}</div>` : ""}
+      </div>`
+    : "";
+
+  return `
+    <article class="system-card system-card--expanded accent-${documentData.accent}">
+      <header class="expanded-card-heading">
+        <span class="summary-copy">${decorateText(card.title, card.title)}</span>
+        <span class="summary-meta">${renderCommentCount(card.id)}${renderInlineActions(card.id, true)}</span>
+      </header>
+      ${body}
+    </article>`;
 }
 
 function renderTopResponse(node, documentData, card, forceOpen = false) {
@@ -1181,7 +1235,7 @@ function renderOtherMajor(token, context) {
   const otherSuit = resolveOtherMajor(context.replace(token, ""));
   const level = token.match(/^([1-7])/)?.[1] || "";
   if (!otherSuit) {
-    return `<span class="bid-token suit-major" title="OM = Other Major（もう一方のメジャー）">${escapeHtml(token)}<small>other major</small></span>`;
+    return `<span class="bid-token suit-major" title="OM = Other Major（もう一方のメジャー）">${escapeHtml(token)}</span>`;
   }
   const symbol = otherSuit === "H" ? "♥" : "♠";
   const suitClass = otherSuit === "H" ? "suit-heart" : "suit-spade";
