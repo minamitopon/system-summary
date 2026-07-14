@@ -44,6 +44,10 @@ const goodBadTwoNt = decorateText("Good 2NT, Bad 2NT");
 assert.deepEqual(holdingTokens("Good 2NT, Bad 2NT"), []);
 assert.equal(goodBadTwoNt.replace(/<[^>]+>/g, ""), "Good 2NT, Bad 2NT");
 
+const otherMajor = decorateText("Cue No OM");
+assert.match(otherMajor, />OM<\/span>/);
+assert.doesNotMatch(otherMajor, /<small>other major<\/small>/i);
+
 for (const prose of ["Cards 2NT", "Methods 3NT", "Lebensohl 2NT"]) {
   assert.deepEqual(holdingTokens(prose), [], prose);
 }

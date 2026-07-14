@@ -1210,7 +1210,7 @@ function renderOtherMajor(token, context) {
   const otherSuit = resolveOtherMajor(context.replace(token, ""));
   const level = token.match(/^([1-7])/)?.[1] || "";
   if (!otherSuit) {
-    return `<span class="bid-token suit-major" title="OM = Other Major（もう一方のメジャー）">${escapeHtml(token)}<small>other major</small></span>`;
+    return `<span class="bid-token suit-major" title="OM = Other Major（もう一方のメジャー）">${escapeHtml(token)}</span>`;
   }
   const symbol = otherSuit === "H" ? "♥" : "♠";
   const suitClass = otherSuit === "H" ? "suit-heart" : "suit-spade";
