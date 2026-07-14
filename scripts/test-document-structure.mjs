@@ -49,6 +49,30 @@ assert.deepEqual(
 const carding = parse("carding", "carding");
 assert.deepEqual(carding.sections.map((section) => section.title), ["Memo"]);
 
+const sectionOrderSource = appSource.slice(
+  appSource.indexOf("function isOpeningDocument"),
+  appSource.indexOf("function renderSection"),
+);
+const { getSectionsInDisplayOrder } = new Function(
+  `${sectionOrderSource}\nreturn { getSectionsInDisplayOrder };`,
+)();
+
+for (const opening of ["1C", "1H", "1S"]) {
+  const document = parse(opening, opening);
+  const titles = getSectionsInDisplayOrder(document).map((section) => section.title);
+  const expected = ["Summary", "Overview", "Detail", "In 3rd/4th seat", "vs intervention"].filter((title) =>
+    titles.includes(title),
+  );
+  assert.deepEqual(titles, expected, opening);
+}
+
+const documentBodySource = appSource.slice(
+  appSource.indexOf("function renderDocumentBody"),
+  appSource.indexOf("function isOpeningDocument"),
+);
+assert.match(documentBodySource, /sections\.flatMap\(\(section\) => section\.blocks\.filter\(isSystemMemo\)\)/);
+assert.match(documentBodySource, /renderedSections.*renderMemoSection\(memoBlocks\)/s);
+
 const normalizeSource = appSource.slice(appSource.indexOf("function normalizeAuction"), appSource.indexOf("function walkNodes"));
 const referenceSource = appSource.slice(
   appSource.indexOf("function renderConventionReference"),

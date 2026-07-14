@@ -573,10 +573,38 @@ function renderDocumentBody(documentData) {
   if (!documentData.sections.length) {
     return `<div class="empty-state"><span aria-hidden="true">♧</span><h3>まだノートがありません</h3><p>この項目は、原文が追加されると自動的に表示されます。</p></div>`;
   }
-  return documentData.sections.map((section) => renderSection(section, documentData)).join("");
+  const sections = getSectionsInDisplayOrder(documentData);
+  const deferMemos = isOpeningDocument(documentData);
+  const renderedSections = sections.map((section) => renderSection(section, documentData, deferMemos)).join("");
+  const memoBlocks = deferMemos ? sections.flatMap((section) => section.blocks.filter(isSystemMemo)) : [];
+  return `${renderedSections}${memoBlocks.length ? renderMemoSection(memoBlocks) : ""}`;
 }
 
-function renderSection(section, documentData) {
+function isOpeningDocument(documentData) {
+  return !["competitive", "carding", "other"].includes(documentData.id);
+}
+
+function getSectionsInDisplayOrder(documentData) {
+  if (!isOpeningDocument(documentData)) return documentData.sections;
+  const priority = new Map([
+    ["summary", 0],
+    ["overview", 10],
+    ["detail", 20],
+    ["in 3rd/4th seat", 30],
+    ["vs intervention", 40],
+  ]);
+
+  return documentData.sections
+    .map((section, index) => ({ section, index }))
+    .sort((left, right) => {
+      const leftPriority = priority.get(left.section.title.trim().toLowerCase()) ?? 35;
+      const rightPriority = priority.get(right.section.title.trim().toLowerCase()) ?? 35;
+      return leftPriority - rightPriority || left.index - right.index;
+    })
+    .map(({ section }) => section);
+}
+
+function renderSection(section, documentData, deferMemos = false) {
   if (section.kind === "topic-index") return renderTopicIndex(section);
   if (section.title.toLowerCase() === "overview") {
     return renderOpeningOverview(section, documentData);
@@ -602,7 +630,7 @@ function renderSection(section, documentData) {
       </section>`
     : "";
 
-  return `${biddingSection}${memoBlocks.length ? renderMemoSection(memoBlocks) : ""}`;
+  return `${biddingSection}${!deferMemos && memoBlocks.length ? renderMemoSection(memoBlocks) : ""}`;
 }
 
 function renderTopicIndex(section) {
