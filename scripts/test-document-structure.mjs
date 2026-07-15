@@ -73,6 +73,17 @@ assert.deepEqual(
 for (const subheading of ["6-1 vs Multi Landy", "6-2 vs 1NT Overcall", "6-3 Our defense vs 1NT"]) {
   assert.equal(competitiveOneNT.blocks.find((block) => block.title === subheading).nodes.length, 0, `${subheading}: subheading`);
 }
+const twoMinorOvercall = competitiveOneNT.blocks.find((block) => block.title === "(1NT) - 2m - (P) -");
+const minorShapeAsk = twoMinorOvercall.nodes.find((node) => node.text.startsWith("2NT"));
+const minimumRelay = minorShapeAsk.children.find((node) => node.text.startsWith("3C"));
+const minimumShapes = minimumRelay.children.find((node) => node.text.startsWith("3D")).children;
+assert.deepEqual(minimumShapes.map((node) => node.text), [
+  "3H  m4H5, min",
+  "3S  m5H5, min",
+  "3NT m5H6, min",
+  "4C  m6H5, min",
+]);
+assert.ok(minorShapeAsk.children.slice(1).every((node) => node.text.endsWith("max")), "Direct shape responses must remain max");
 
 const competitiveRenderBranch = appSource.slice(
   appSource.indexOf("function renderSection"),
