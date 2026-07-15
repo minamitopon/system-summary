@@ -86,7 +86,14 @@ assert.deepEqual(minimumShapes.map((node) => node.text), [
 assert.ok(minorShapeAsk.children.slice(1).every((node) => node.text.endsWith("max")), "Direct shape responses must remain max");
 
 const xyz = competitive.sections.find((section) => section.topicNumber === "13");
-assert.deepEqual(xyz.blocks.map((block) => block.title), ["1C - 1X; 1Y - ?", "P - 1X; 1Y - 1NT; ?"]);
+assert.deepEqual(xyz.blocks.map((block) => block.title), [
+  "1C - 1X; 1Y - ?",
+  "1C - 1D; 1H - ?",
+  "P - 1X; 1Y - 1NT; ?",
+]);
+assert.ok(xyz.blocks[0].nodes.some((node) => node.text === "2NT INV, w/o C5"));
+assert.deepEqual(xyz.blocks[1].nodes.map((node) => node.text), ["3C  S/T", "3D  S/T", "3H  S/T"]);
+
 const negativeDouble = competitive.sections.find((section) => section.topicNumber === "15");
 assert.equal(negativeDouble.blocks[0].title, "1m - (PRE) - X - (P); any - (P) - ?");
 const overcall = competitive.sections.find((section) => section.title === "Overcall");
@@ -134,7 +141,9 @@ assert.ok(
 );
 
 const carding = parse("carding", "carding");
-assert.deepEqual(carding.sections.map((section) => section.title), ["Memo"]);
+assert.deepEqual(carding.sections.map((section) => section.title), ["Carding"]);
+assert.equal(carding.sections[0].blocks[0].title, "UDCA");
+assert.deepEqual(carding.sections[0].blocks[0].nodes.map((node) => node.text), ["O/E first discard, only vs NT"]);
 
 const sectionOrderSource = appSource.slice(
   appSource.indexOf("function isOpeningDocument"),
