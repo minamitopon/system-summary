@@ -45,6 +45,15 @@ assert.deepEqual(
 );
 assert.ok(rubensohlResponses.every((node) => node.depth === 0), "Rubensohl calls must share one level");
 
+assert.deepEqual(
+  competitive.sections[3].blocks.map((block) => block.title),
+  ["3-1 Good 2NT", "Situation", "Responses", "3-2 Bad 2NT(by Responder)", "Situation", "Responses"],
+);
+const [good2NT, bad2NT] = competitive.sections[3].blocks.filter((block) => block.title === "Responses");
+assert.deepEqual(good2NT.nodes.map((node) => node.text), ["2NT Good", "3X  Bad"]);
+assert.deepEqual(bad2NT.nodes.map((node) => node.text), ["2NT Bad", "3X  Good"]);
+assert.ok([...good2NT.nodes, ...bad2NT.nodes].every((node) => node.depth === 0), "Good/Bad 2NT calls must share one level");
+
 const competitiveRenderBranch = appSource.slice(
   appSource.indexOf("function renderSection"),
   appSource.indexOf("function renderTopicIndex"),
