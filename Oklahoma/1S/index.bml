@@ -148,7 +148,7 @@ Detail
   - 4S  H, 18+HCP
 
 
-1H - 3C;
+1S - 3C;
 3D  asking
   - 3H  12 - 14HCP
     - 3S  asking
@@ -166,7 +166,7 @@ Detail
 1S - 3D;
 3H  asking
   - 3S  11 - 12HCP
-  - 3NT 12 - 14HCP
+  - 3NT 13 - 14HCP
   - 4C  15 - 17HCP
   - 4D  18+HCP, C CTRL
   - 4H  18+HCP, D CTRL
@@ -210,10 +210,10 @@ P - 1S
     - 3H  S4, value
     - 3S  S4
     - 3NT S4, any Void
-        - 4C  asking
-          - 4D  S4C0
-          - 4H  S4D0
-          - 4S  S4H0
+      - 4C  asking
+        - 4D  S4C0
+        - 4H  S4D0
+        - 4S  S4H0
     - 4X  S4X1
 2D  H6, CONST
 2H  S3, 6 - 9HCP
@@ -241,11 +241,9 @@ P - (P) - 1M - (X)
 same as P - 1S
 
 System ON
-P - 1S;
-1NT - any
+P - 1S; 1NT - any
 system on over 1NT(6 - 12HCP)
 
 System OFF
-1S - (X) - 1NT - (P);
-any
+1S - (X) - 1NT - (P); any
 system off over 1NT(8 - 10HCP)

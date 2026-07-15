@@ -106,7 +106,7 @@ Detail
     - 4D  D6, FG
     - 4H  H3, Bad
   - 3S  minimum
-3D  D6H0 ~ 2, INV
+3D  D6S0 ~ 2, INV
   - 3H  H5+, FG
   - 3S  S6+, FG
 3H  S4, INV w/shape

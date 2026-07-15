@@ -52,6 +52,7 @@ Situation
 ① 1NT-(2X)
 ② (2X)-2NT-(P)
 
+Responses
 2NT TRF, Clubs
 3C  TRF, Diamonds
 3D  TRF, Hearts
@@ -68,14 +69,18 @@ Situation
 ② 1X-(2Y)-P-(P);
 ③ 1X-(P)-1Y-(2Z);
 
+Responses
 2NT Good
 3X  Bad
 
-3-1 Bad 2NT(by Responder)
+3-2 Bad 2NT(by Responder)
+
+Situation
 ① 1level response
 ② Opener is less than INV.
 ③ Responder can't jump rebid.
 
+Responses
 2NT Bad
 3X  Good
 
@@ -139,7 +144,8 @@ Situation
 
 6, 1NT
 
-vs Multi Landy
+6-1 vs Multi Landy
+
 1NT - (X) -
 P   Play
 XX  Pup to 2C
@@ -172,6 +178,8 @@ X   cards, force to 2NT, next Dbl = Pen
 3H  S5, INV+
 
 
+6-2 vs 1NT Overcall
+
 1X - (1NT) -
 2C  Ms
 2D  Hearts
@@ -180,6 +188,8 @@ X   cards, force to 2NT, next Dbl = Pen
 2NT C + D
 3C  Diamonds
 
+
+6-3 Our defense vs 1NT
 
 (1NT) - X - (P) -
 2C  Positive, 8 - 10HCP
@@ -200,10 +210,10 @@ X   cards, force to 2NT, next Dbl = Pen
 2NT Shape ask
   - 3C  min
     - 3D  asking
-      - 3H  m4H5, max
-      - 3S  m5H5, max
-      - 3NT m5H6, max
-      - 4C  m6H5, max
+      - 3H  m4H5, min
+      - 3S  m5H5, min
+      - 3NT m5H6, min
+      - 4C  m6H5, min
   - 3D  m4H5, max
   - 3H  m5H5, max
   - 3S  m5H6, max
@@ -276,8 +286,7 @@ Situation
 
 13, XYZ
 
-1C - 1X;
-1Y -
+1C - 1X; 1Y - ?
 2C  pup to 2D
   - 2D  accept
     - 2NT INV with C5
@@ -285,10 +294,14 @@ Situation
 2D  FG
   - 2M M
     - 3NT FG with 5cards(not having enough strength)
-2NT INV
+2NT INV, w/o C5
 
-P - 1X;
-1Y - 1NT;
+1C - 1D; 1H - ?
+3C  S/T
+3D  S/T
+3H  S/T
+
+P - 1X; 1Y - 1NT; ?
 2C  F1
 2D  NF
 
@@ -302,14 +315,12 @@ P - 1X;
 
 15, Negative Double
 
-1m - (PRE) - X - (P);
-any - (P) -
+1m - (PRE) - X - (P); any - (P) - ?
 new suit = NAT, NF
 
 /*============*/
 Overcall
 /*============*/
 
-(1M) - 2m - (2M) - P;
-(P) -
-2NT m6H4
+(1M) - 2m - (2M) - P; (P) - ?
+2NT m6OM4
