@@ -147,6 +147,17 @@ function findNode(nodes, prefix) {
   return nodes.find((node) => node.text.startsWith(prefix));
 }
 
+for (const [opening, cardTitle, askingBid, expectedSteps] of [
+  ["1H", "1H - 3C;", "3D", ["3H  11 - 12HCP", "3S  13 - 14HCP", "3NT 15 - 17HCP"]],
+  ["1S", "1S - 3D;", "3H", ["3S  11 - 12HCP", "3NT 13 - 14HCP", "4C  15 - 17HCP"]],
+]) {
+  const document = parse(opening, opening);
+  const detail = document.sections.find((section) => section.title === "Detail");
+  const card = detail.blocks.find((block) => block.title === cardTitle);
+  const steps = findNode(card.nodes, askingBid).children.slice(0, 3).map((node) => node.text);
+  assert.deepEqual(steps, expectedSteps, `${opening}: HCP steps must not overlap`);
+}
+
 for (const [opening, cardTitle, voidBid, askingBid] of [
   ["1H", "P - 1H", "3S", "3NT"],
   ["1S", "P - 1S", "3NT", "4C"],
