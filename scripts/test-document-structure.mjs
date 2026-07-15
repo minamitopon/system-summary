@@ -114,6 +114,16 @@ assert.deepEqual(
 );
 assert.ok(
   other.sections
+    .find((section) => section.title === "RKCB")
+    .blocks.some(
+      (card) =>
+        card.title ===
+        "WK2に対するRKCBは01122（0 key / 1 key, Qなし / 1 key, Qあり / 2 key, Qなし / 2 key, Qあり）",
+    ),
+  "Other: WK2 RKCB must document all 01122 steps",
+);
+assert.ok(
+  other.sections
     .find((section) => section.title === "その他")
     .blocks.some(
       (card) =>

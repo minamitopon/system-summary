@@ -1,6 +1,8 @@
 /*============*/
 RKCB
 /*============*/
+WK2に対するRKCBは01122（0 key / 1 key, Qなし / 1 key, Qあり / 2 key, Qなし / 2 key, Qあり）
+
 K ask はポジション
 3rd Round CTRL ask は K ask などを飛ばした際に発生（ex. 4N- 5H; 6D）
 3rd Round CTRL ask は Q があれば 7 にレイズ、xx なら 7 トランプ（ただしそのスートの長さが既に示されている場合はプレイの提案）
