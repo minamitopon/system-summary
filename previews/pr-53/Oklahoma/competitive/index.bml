@@ -210,10 +210,10 @@ X   cards, force to 2NT, next Dbl = Pen
 2NT Shape ask
   - 3C  min
     - 3D  asking
-      - 3H  m4H5, max
-      - 3S  m5H5, max
-      - 3NT m5H6, max
-      - 4C  m6H5, max
+      - 3H  m4H5, min
+      - 3S  m5H5, min
+      - 3NT m5H6, min
+      - 4C  m6H5, min
   - 3D  m4H5, max
   - 3H  m5H5, max
   - 3S  m5H6, max
