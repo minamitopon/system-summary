@@ -54,6 +54,26 @@ assert.deepEqual(good2NT.nodes.map((node) => node.text), ["2NT Good", "3X  Bad"]
 assert.deepEqual(bad2NT.nodes.map((node) => node.text), ["2NT Bad", "3X  Good"]);
 assert.ok([...good2NT.nodes, ...bad2NT.nodes].every((node) => node.depth === 0), "Good/Bad 2NT calls must share one level");
 
+const competitiveOneNT = competitive.sections.find((section) => section.topicNumber === "6");
+assert.deepEqual(
+  competitiveOneNT.blocks.map((block) => block.title),
+  [
+    "6-1 vs Multi Landy",
+    "1NT - (X) -",
+    "1NT - (2C/D = Ms) -",
+    "1NT - (2C/2D = 1M) -",
+    "6-2 vs 1NT Overcall",
+    "1X - (1NT) -",
+    "6-3 Our defense vs 1NT",
+    "(1NT) - X - (P) -",
+    "(1NT) - 2m - (P) -",
+    "(1NT) - 2M - (P) -",
+  ],
+);
+for (const subheading of ["6-1 vs Multi Landy", "6-2 vs 1NT Overcall", "6-3 Our defense vs 1NT"]) {
+  assert.equal(competitiveOneNT.blocks.find((block) => block.title === subheading).nodes.length, 0, `${subheading}: subheading`);
+}
+
 const competitiveRenderBranch = appSource.slice(
   appSource.indexOf("function renderSection"),
   appSource.indexOf("function renderTopicIndex"),
