@@ -72,6 +72,23 @@ for (const opening of ["1C", "1H", "1S"]) {
   assert.deepEqual(titles, expected, opening);
 }
 
+function findNode(nodes, prefix) {
+  return nodes.find((node) => node.text.startsWith(prefix));
+}
+
+for (const [opening, cardTitle, voidBid, askingBid] of [
+  ["1H", "P - 1H", "3S", "3NT"],
+  ["1S", "P - 1S", "3NT", "4C"],
+]) {
+  const document = parse(opening, opening);
+  const section = document.sections.find((item) => item.title === "In 3rd/4th seat");
+  const card = section.blocks.find((item) => item.title === cardTitle);
+  const drury = findNode(card.nodes, "2C");
+  const relay = findNode(drury.children, "2D");
+  const voidResponse = findNode(relay.children, voidBid);
+  assert.ok(findNode(voidResponse.children, askingBid), `${opening}: asking bid must remain under any Void`);
+}
+
 const documentBodySource = appSource.slice(
   appSource.indexOf("function renderDocumentBody"),
   appSource.indexOf("function isOpeningDocument"),

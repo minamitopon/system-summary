@@ -183,10 +183,10 @@ P - 1H
     - 3D  H4, value
     - 3H  H4
     - 3S  H4, any Void
-        - 3NT asking
-          - 4C  H4C0
-          - 4D  H4D0
-          - 4H  H4S0
+      - 3NT asking
+        - 4C  H4C0
+        - 4D  H4D0
+        - 4H  H4S0
     - 3NT H4S1
     - 4X  H4X1
 2S  S6H3, INV

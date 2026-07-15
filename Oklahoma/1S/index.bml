@@ -210,10 +210,10 @@ P - 1S
     - 3H  S4, value
     - 3S  S4
     - 3NT S4, any Void
-        - 4C  asking
-          - 4D  S4C0
-          - 4H  S4D0
-          - 4S  S4H0
+      - 4C  asking
+        - 4D  S4C0
+        - 4H  S4D0
+        - 4S  S4H0
     - 4X  S4X1
 2D  H6, CONST
 2H  S3, 6 - 9HCP
