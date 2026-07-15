@@ -241,11 +241,9 @@ P - (P) - 1M - (X)
 same as P - 1S
 
 System ON
-P - 1S;
-1NT - any
+P - 1S; 1NT - any
 system on over 1NT(6 - 12HCP)
 
 System OFF
-1S - (X) - 1NT - (P);
-any
+1S - (X) - 1NT - (P); any
 system off over 1NT(8 - 10HCP)

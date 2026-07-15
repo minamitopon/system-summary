@@ -85,6 +85,14 @@ assert.deepEqual(minimumShapes.map((node) => node.text), [
 ]);
 assert.ok(minorShapeAsk.children.slice(1).every((node) => node.text.endsWith("max")), "Direct shape responses must remain max");
 
+const xyz = competitive.sections.find((section) => section.topicNumber === "13");
+assert.deepEqual(xyz.blocks.map((block) => block.title), ["1C - 1X; 1Y - ?", "P - 1X; 1Y - 1NT; ?"]);
+const negativeDouble = competitive.sections.find((section) => section.topicNumber === "15");
+assert.equal(negativeDouble.blocks[0].title, "1m - (PRE) - X - (P); any - (P) - ?");
+const overcall = competitive.sections.find((section) => section.title === "Overcall");
+assert.equal(overcall.blocks[0].title, "(1M) - 2m - (2M) - P; (P) - ?");
+assert.deepEqual(overcall.blocks[0].nodes.map((node) => node.text), ["2NT m6OM4"]);
+
 const competitiveRenderBranch = appSource.slice(
   appSource.indexOf("function renderSection"),
   appSource.indexOf("function renderTopicIndex"),
@@ -140,6 +148,19 @@ for (const [opening, cardTitle, voidBid, askingBid] of [
   const relay = findNode(drury.children, "2D");
   const voidResponse = findNode(relay.children, voidBid);
   assert.ok(findNode(voidResponse.children, askingBid), `${opening}: asking bid must remain under any Void`);
+}
+
+for (const opening of ["1H", "1S"]) {
+  const document = parse(opening, opening);
+  const memoCards = document.sections.flatMap((section) => section.blocks).filter((card) => /^System (?:ON|OFF)$/.test(card.title));
+  assert.deepEqual(memoCards[0].nodes.map((node) => node.text), [
+    `P - ${opening}; 1NT - any`,
+    "system on over 1NT(6 - 12HCP)",
+  ]);
+  assert.deepEqual(memoCards[1].nodes.map((node) => node.text), [
+    `${opening} - (X) - 1NT - (P); any`,
+    "system off over 1NT(8 - 10HCP)",
+  ]);
 }
 
 const oneNT = parse("1NT", "1NT");
