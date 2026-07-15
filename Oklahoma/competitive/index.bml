@@ -348,15 +348,13 @@ new suit = NAT, NF
       - 4C S/T
       - 4D H4, Good
       - 4H H4, NF
+3H  H5+
   - 3S  ask stopper
     - 3NT have stopper
-  - 3H  H5+
-    - 3S  ask stopper
-      - 3NT have stopper
-    - 4D H3+, Good
-    - 4H H3+, NF
-  - 3S  D5+, Good
-  - 3NT play
+  - 4D H3+, Good
+  - 4H H3+, NF
+3S  D5+, Good
+3NT play
 
 
 (2S) - 3D - (P) -
