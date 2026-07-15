@@ -1,0 +1,49 @@
+2C Opening
+
+/*============*/
+Overview
+/*============*/
+Any strong hands.
+
+
+/*============*/
+Detail
+/*============*/
+
+2C
+  - 2D  ①4+HCP ②1K
+  - 2H  0 - 3HCP
+  - 2S  any solid suit(less than 1 loser)
+  - 2NT C6
+  - 3C  D6
+  - 3D  H6
+  - 3H  S6
+
+
+2C - 2D;
+2H  Pup to 2S
+  - 2S  Forced
+    - 2NT 24 - 25HCP, balanced
+    - 3C C4H5
+    - 3D D4H5
+    - 3H H6
+    - 3S S4H5
+2S  NAT
+2NT 22 - 23HCP, balanced
+
+
+2C - 2H;
+2S  Pup to 2NT
+  - 2NT  Forced
+    - 3X  NAT, NF
+      - 4C  Good hand
+2NT 22 - 23HCP, balanced
+3X  NAT, FG
+3NT NF
+  - 4C  Stayman
+  - 4D  TRF
+  - 4S  mss
+
+/*============*/
+vs intervention
+/*============*/
