@@ -112,6 +112,16 @@ assert.deepEqual(
   other.sections.map((section) => section.title),
   ["RKCB", "ノンシリアス3NT", "枚数が減った後のリード", "その他", "ACOL 4NT"],
 );
+assert.ok(
+  other.sections
+    .find((section) => section.title === "その他")
+    .blocks.some(
+      (card) =>
+        card.title ===
+        "NTオープンに2スーターFGをかけてゲーム未満でフィットが示せない時、下のcueがゲームの台が低いスートのS/T、上のcueがゲームの台が高いスートのS/Tとみなす",
+    ),
+  "Other: two-suiter cue agreement must be complete",
+);
 
 const carding = parse("carding", "carding");
 assert.deepEqual(carding.sections.map((section) => section.title), ["Memo"]);
