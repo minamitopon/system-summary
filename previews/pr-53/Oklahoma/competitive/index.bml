@@ -1,0 +1,325 @@
+vs intervention
+
+/*============*/
+Index
+/*============*/
+1,  2-suiter 2NT OC
+2,  Lebensohl & Rubensohl
+3,  Good 2NT, Bad 2NT
+4,  Support 2NT
+5,  After 3NT OC
+6,  1NT
+7,  vs 2D, 2H (Ms Weak)
+8,  Switching
+9,  vs T/O Dbl
+10, Drury
+11, vs ART bids
+12, Forcing Pass
+13, XYZ
+14, Leaping Michaels
+
+/*============*/
+Detail
+/*============*/
+
+1, 2-suiter 2NT OC
+
+Situation
+① (1X)P(2X)2NT = unspecific 2-suit
+② (1S)-P-(1N)-2N = D&C
+
+
+2, Lebensohl & Rubensohl
+2-1 Lebensohl
+
+Situation
+① (2M) - X - (P) - ?
+② (1M) - X - (2M) - ?, (1M) - P - (2M) - X; (P)-?
+③ 1X - (2Y) - P - (P); Dbl - (P)
+
+2NT Pup to 3C
+  - 3C  accept
+    - Cue 4OM + No stopper
+    - Bid weak
+    - 3NT 4OM + stopper
+- Cue No OM + No stopper
+- Bid some value
+- 3NT No OM + stopper
+
+2-2 Rubensohl
+
+Situation
+① 1NT-(2X)
+② (2X)-2NT-(P)
+
+Responses
+2NT TRF, Clubs
+3C  TRF, Diamonds
+3D  TRF, Hearts
+3H  TRF, Spades
+3NT Play
+Relay to Opponents's suit asks M4.
+
+
+3, Good 2NT, Bad 2NT
+3-1 Good 2NT
+
+Situation
+① 1X-(1Y)-P-(2Y);
+② 1X-(2Y)-P-(P);
+③ 1X-(P)-1Y-(2Z);
+
+Responses
+2NT Good
+3X  Bad
+
+3-2 Bad 2NT(by Responder)
+
+Situation
+① 1level response
+② Opener is less than INV.
+③ Responder can't jump rebid.
+
+Responses
+2NT Bad
+3X  Good
+
+
+4, Support 2NT
+
+Situation
+① Overcalled by partner.
+② We're all in on the auction.
+③ Can't cuebid below 2level.
+④ P(1H)1S(2H);2NT = SUPP
+
+5, After 3NT OC
+
+(3m) - 3NT
+4C  Ms or 1suit
+  - 4D  preferance for Hearts
+    - 4M  Play
+    - 4NT RKCB
+    - 5om Play
+  - 4H  preferance for Spades
+    - 4S  Play
+    - 4NT RKCB
+    - 5om Play
+4D  asking
+  - 4H  19+HCP, any
+    - 4NT Baron(cue = str om)
+    - Cue SPL(4441)
+    - 5NT INV to 7NT
+  - 4S  Gamble
+  - 4NT 15 - 18HCP, balanced
+    - 5C~ System on
+4M  NAT, mild INV
+  - Cue RKCB
+5om NAT, mild INV
+  - Cue RKCB
+
+(3M) - 3NT
+4C  ms or 1suit
+  - 4D  preferance for Clubs
+    - 4OM Play
+    - 4NT RKCB
+    - 5m  Play
+  - 4H  preferance for Diamonds
+    - 4OM Play
+    - 4NT RKCB
+    - 5m  Play
+4D  asking
+  - 4H  19+HCP, any
+    - 4NT Baron(cue = str om)
+    - Cue SPL(4441)
+    - 5NT INV to 7NT
+  - 4S  Gamble
+  - 4NT 15 - 18HCP, balanced
+    - 5C~ System on
+4OM NAT, mild INV
+  - Cue RKCB
+5m  NAT, mild INV
+  - Cue RKCB
+
+
+6, 1NT
+
+6-1 vs Multi Landy
+
+1NT - (X) -
+P   Play
+XX  Pup to 2C
+  - 2C  Relay
+    - 2X  S/O
+2C  C + any
+2D  D + M
+2H  H + S
+
+1NT - (2C/D = Ms) -
+X   Cards
+2D  S/O
+2H  C, INV
+2S  D, INV
+2NT C, weak or FG
+3C  D, weak or FG
+3D  only H stopper
+3H  only S stopper
+3S  No stopper
+3NT Both stopper
+
+
+1NT - (2C/2D = 1M) -
+X   cards, force to 2NT, next Dbl = Pen
+2H  NAT, S/O
+2S  NAT, S/O
+2NT C, weak or FG
+3C  D, weak or FG
+3D  H5, INV+
+3H  S5, INV+
+
+
+6-2 vs 1NT Overcall
+
+1X - (1NT) -
+2C  Ms
+2D  Hearts
+2H  Spades
+2S  Clubs
+2NT C + D
+3C  Diamonds
+
+
+6-3 Our defense vs 1NT
+
+(1NT) - X - (P) -
+2C  Positive, 8 - 10HCP
+  - 2D  Good hand
+  - 2H  min
+  - 2NT M65
+  - 3m  NAT, 4cards
+2D  ask better M
+2NT Shape ask
+  - 3C  H5S4, min
+  - 3D  H4S5, min
+  - 3H  H5S5, min
+  - 3S  H5S4, max
+  - 3NT H4S5, max
+3M  Preemptive
+
+(1NT) - 2m - (P) -
+2NT Shape ask
+  - 3C  min
+    - 3D  asking
+      - 3H  m4H5, max
+      - 3S  m5H5, max
+      - 3NT m5H6, max
+      - 4C  m6H5, max
+  - 3D  m4H5, max
+  - 3H  m5H5, max
+  - 3S  m5H6, max
+  - 3NT m6H5, max
+New suit  NF
+
+(1NT) - 2M - (P) -
+2NT Ogust
+  - 3C Sorry...
+    - Re ask
+      - 3H Min
+      - 3S Max
+      - 3NT Max, 5cards
+  - 3D Bad suit,min
+  - 3H Good suit,min
+  - 3S Bad suit,max
+  - 3NT Good suit,max
+
+
+7, vs 2D, 2H (Ms Weak)
+
+(2D) -
+X  12 - 14HCP, BAL
+2H  C ≧ D
+2S  C < D
+2NT 15 - 18HCP, BAL
+
+(2H) -
+X  C ≧ D
+2S C < D
+2NT 15 - 18HCP, BAL
+
+
+8, Switching
+
+Situation
+① The other two suits are on the same level.
+② Not passed hand.
+③ 3S and below.
+④Oppornent bids only one suit.
+
+
+9, vs T/O Dbl
+
+1M - (X) -
+1NT 8 - 10HCP
+2m  INV
+2M-1 Good raise
+2M  Bad raise
+
+
+10, Drury
+
+Situation
+① (1X) - 1M - (P or X) -
+② P - (P) - 1M - (X)
+③ P - (P) - 1X - (1Y)
+
+
+11, vs ART bids
+
+(1M) - (2NT/3X = ART raise)
+3NT ms (ART raise = FG)
+3NT To play (ART raise = other)
+
+12, Forcing Pass
+
+① Force to bid Game.
+② Not after 1M - SPL, FSJ
+
+13, XYZ
+
+1C - 1X;
+1Y -
+2C  pup to 2D
+  - 2D  accept
+    - 2NT INV with C5
+    - 3NT FG with 5cards(enough strength)
+2D  FG
+  - 2M M
+    - 3NT FG with 5cards(not having enough strength)
+2NT INV
+
+P - 1X;
+1Y - 1NT;
+2C  F1
+2D  NF
+
+14, Leaping Michaels
+
+① (2M) - ?
+② (2M) - 2NT - (P) -
+③ (1M) - P - (2M) -
+
+4m  leaping Michaels
+
+15, Negative Double
+
+1m - (PRE) - X - (P);
+any - (P) -
+new suit = NAT, NF
+
+/*============*/
+Overcall
+/*============*/
+
+(1M) - 2m - (2M) - P;
+(P) -
+2NT m6H4
