@@ -286,8 +286,7 @@ Situation
 
 13, XYZ
 
-1C - 1X;
-1Y -
+1C - 1X; 1Y - ?
 2C  pup to 2D
   - 2D  accept
     - 2NT INV with C5
@@ -297,8 +296,7 @@ Situation
     - 3NT FG with 5cards(not having enough strength)
 2NT INV
 
-P - 1X;
-1Y - 1NT;
+P - 1X; 1Y - 1NT; ?
 2C  F1
 2D  NF
 
@@ -312,14 +310,12 @@ P - 1X;
 
 15, Negative Double
 
-1m - (PRE) - X - (P);
-any - (P) -
+1m - (PRE) - X - (P); any - (P) - ?
 new suit = NAT, NF
 
 /*============*/
 Overcall
 /*============*/
 
-(1M) - 2m - (2M) - P;
-(P) -
-2NT m6H4
+(1M) - 2m - (2M) - P; (P) - ?
+2NT m6OM4

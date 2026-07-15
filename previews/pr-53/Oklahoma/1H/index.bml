@@ -160,13 +160,11 @@ vs intervention
 /*============*/
 
 System ON
-P - 1H;
-1NT - any
+P - 1H; 1NT - any
 system on over 1NT(6 - 12HCP)
 
 System OFF
-1H - (X) - 1NT - (P);
-any
+1H - (X) - 1NT - (P); any
 system off over 1NT(8 - 10HCP)
 
 /*============*/
