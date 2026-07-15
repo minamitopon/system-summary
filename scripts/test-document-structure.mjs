@@ -29,8 +29,21 @@ assert.equal(competitive.sections.at(-2).title, "15. Negative Double");
 assert.equal(competitive.sections.at(-1).title, "Overcall");
 assert.deepEqual(
   competitive.sections[2].blocks.map((block) => block.title),
-  ["2-1 Lebensohl", "Situation", "2NT Pup to 3C", "2-2 Rubensohl", "Situation", "2NT TRF, Clubs"],
+  ["2-1 Lebensohl", "Situation", "2NT Pup to 3C", "2-2 Rubensohl", "Situation", "Responses"],
 );
+const rubensohlResponses = competitive.sections[2].blocks.at(-1).nodes;
+assert.deepEqual(
+  rubensohlResponses.map((node) => node.text),
+  [
+    "2NT TRF, Clubs",
+    "3C  TRF, Diamonds",
+    "3D  TRF, Hearts",
+    "3H  TRF, Spades",
+    "3NT Play",
+    "Relay to Opponents's suit asks M4.",
+  ],
+);
+assert.ok(rubensohlResponses.every((node) => node.depth === 0), "Rubensohl calls must share one level");
 
 const competitiveRenderBranch = appSource.slice(
   appSource.indexOf("function renderSection"),
