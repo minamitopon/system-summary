@@ -19,8 +19,16 @@ jobs:
     steps:
       - name: Checkout pull request
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Test site
+        run: bash scripts/test-site.sh
       - name: Build static site
         run: ./scripts/build-site.sh
+      - name: Record changed system lines
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: node scripts/generate-preview-changes.mjs "${BASE_SHA}" "${GITHUB_SHA}" "_site/preview-changes.json"
       - name: Publish preview directory
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -47,7 +55,8 @@ jobs:
 
           Preview: ${PREVIEW_URL}
 
-          このURLはPRの更新ごとに自動更新されます。"
+          このURLはPRの更新ごとに自動更新されます。
+          システムを変更したPRでは、今回の変更箇所を黄色で表示します。"
           comment_id="$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" --paginate --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | contains("<!-- system-summary-pr-preview -->"))) | .id' | head -n 1)"
           if [[ -n "${comment_id}" ]]; then
             gh api --method PATCH "repos/${GITHUB_REPOSITORY}/issues/comments/${comment_id}" -f body="${body}" >/dev/null
