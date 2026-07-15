@@ -111,6 +111,31 @@ for (const [opening, cardTitle, voidBid, askingBid] of [
   assert.ok(findNode(voidResponse.children, askingBid), `${opening}: asking bid must remain under any Void`);
 }
 
+const oneNT = parse("1NT", "1NT");
+const oneNTIntervention = oneNT.sections.find((section) => section.title === "vs intervention");
+assert.deepEqual(
+  oneNTIntervention.blocks.map((card) => card.title),
+  ["1NT - 2C -(X)", "1NT - 2S -(X)"],
+);
+
+const twoClubDoubled = oneNTIntervention.blocks[0];
+const passAfterTwoClubs = findNode(twoClubDoubled.nodes, "Pass");
+assert.deepEqual(passAfterTwoClubs.children.map((node) => node.text), [
+  "XX  pup to 2D",
+  "2R  TRF, INV, guard your honor",
+  "2NT~ system on",
+]);
+const twoDiamondRelay = findNode(findNode(passAfterTwoClubs.children, "XX").children, "2D");
+assert.deepEqual(twoDiamondRelay.children.map((node) => node.text), ["Pass play", "2M  INV, guard my honor"]);
+assert.ok(findNode(twoClubDoubled.nodes, "XX   play"), "1NT-2C-(X): XX play must remain a direct call");
+
+const twoSpadesDoubled = oneNTIntervention.blocks[1];
+const passAfterTwoSpades = findNode(twoSpadesDoubled.nodes, "Pass");
+assert.deepEqual(passAfterTwoSpades.children.map((node) => node.text), ["XX  w/o stoper", "2NT w/ stoper"]);
+const redoubleAfterTwoSpades = findNode(passAfterTwoSpades.children, "XX");
+assert.deepEqual(redoubleAfterTwoSpades.children.map((node) => node.text), ["2NT NF", "3m  NF", "4m  Good hands"]);
+assert.deepEqual(twoSpadesDoubled.nodes.slice(1).map((node) => node.text), ["2NT  w/ stoper", "3C   w/ stoper"]);
+
 const documentBodySource = appSource.slice(
   appSource.indexOf("function renderDocumentBody"),
   appSource.indexOf("function isOpeningDocument"),
