@@ -47,8 +47,14 @@ Detail
       - 4H  H3
   - 3H  H5S4, INV, Good S4
   - 3S  H5S4, FG
+  - 3NT S4H4, NF
+    - 4C  transfer to 4H
+    - 4D  transfer to 4S
+    - 4M  play
   - 4C  H6S4
   - 4D  H4S6
+  - 4H  S4H4, mild S/T
+  - 4S  S4H4, F1
 
 
 1NT - 2D;
@@ -101,9 +107,9 @@ Detail
 
 
 1NT - 3D;
-3H  H4
-3S  S4
-3NT No M4
+3H  ask
+  - 3S  H4
+  - 3NT S4
 
 
 1NT - 3M;
