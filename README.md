@@ -10,6 +10,24 @@ Pull Requestには `https://minamitopon.github.io/system-summary/previews/pr-<PR
 
 現在、提案とコメントはブラウザ内のプレビューで、外部保存とPR作成は無効です。共同利用版の認証・PR・コメント設計は `docs/collaboration-architecture.md` を参照してください。
 
+## PRを作る前のローカル確認
+
+リポジトリ直下で次を実行します。追加インストールは不要です。
+
+```bash
+node scripts/preview-local.mjs
+```
+
+表示された `http://localhost:8000/system-summary/` をブラウザで開いてください。HTML、CSS、JavaScript、`index.bml`を保存すると、開いているページが自動更新されます。終了するときはターミナルで `Ctrl+C` を押します。
+
+同じWi-Fiのスマートフォンから確認する場合は、次のように起動し、`localhost`をPCのIPアドレスに置き換えてアクセスします。
+
+```bash
+node scripts/preview-local.mjs --host 0.0.0.0
+```
+
+ポート8000が使用中なら、`--port 8080`のように別の番号を指定できます。
+
 ## ブランチルール
 ### main
 リリース後のシステムのみが存在する。  

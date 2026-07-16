@@ -5,6 +5,13 @@ const appSource = fs.readFileSync(new URL("../assets/app.js", import.meta.url), 
 const parserSource = appSource.slice(appSource.indexOf("function parseDocument"), appSource.indexOf("function buildTargetIndex"));
 const { parseDocument } = new Function(`${parserSource}\nreturn { parseDocument };`)();
 
+const tabIndented = parseDocument(
+  { id: "tabs", label: "tabs", title: "tabs", subtitle: "", path: "Oklahoma/tabs/index.bml", accent: "other" },
+  "Card\n\tChild\n\t\tGrandchild",
+);
+assert.equal(tabIndented.sections[0].blocks[0].nodes[0].text, "Child");
+assert.equal(tabIndented.sections[0].blocks[0].nodes[0].children[0].text, "Grandchild");
+
 function parse(id, file) {
   return parseDocument(
     { id, label: id, title: id, subtitle: "", path: `Oklahoma/${file}/index.bml`, accent: "other" },
@@ -12,13 +19,51 @@ function parse(id, file) {
   );
 }
 
+function assertSourceLocations(document, file) {
+  const sourceLines = fs
+    .readFileSync(new URL(`../Oklahoma/${file}/index.bml`, import.meta.url), "utf8")
+    .replace(/\r\n/g, "\n")
+    .split("\n");
+
+  function assertNodes(nodes) {
+    nodes.forEach((node) => {
+      assert.equal(node.path, document.path, `${file}: node path`);
+      assert.ok(Number.isInteger(node.sourceLine), `${file}: node source line`);
+      const sourceText = sourceLines[node.sourceLine - 1]?.trim().replace(/^[-–]\s*/, "");
+      assert.equal(sourceText, node.text, `${file}:${node.sourceLine} node text`);
+      assertNodes(node.children);
+    });
+  }
+
+  document.sections.forEach((section) => {
+    assert.equal(section.path, document.path, `${file}: section path`);
+    assert.ok(Number.isInteger(section.sourceLine), `${file}: section source line`);
+    section.items?.forEach((item) => {
+      assert.equal(item.path, document.path, `${file}: topic path`);
+      assert.ok(sourceLines[item.sourceLine - 1]?.includes(item.title), `${file}:${item.sourceLine} topic title`);
+    });
+    section.blocks.forEach((card) => {
+      assert.equal(card.path, document.path, `${file}: card path`);
+      assert.ok(Number.isInteger(card.sourceLine), `${file}: card source line`);
+      const sourceTitle = sourceLines[card.sourceLine - 1]
+        ?.trim()
+        .replace(/^#{1,6}\s*/, "")
+        .replace(/^[-–]\s*/, "");
+      assert.equal(sourceTitle, card.title, `${file}:${card.sourceLine} card title`);
+      assertNodes(card.nodes);
+    });
+  });
+}
+
 for (const opening of ["1C", "1D", "1H", "1S", "1NT", "2C", "2D", "2M", "2NT", "3NT"]) {
   const document = parse(opening, opening);
+  assertSourceLocations(document, opening);
   assert.equal(document.sections.some((section) => section.title === "Summary"), false, opening);
   assert.equal(document.sections[0]?.title, "Overview", opening);
 }
 
 const competitive = parse("competitive", "competitive");
+assertSourceLocations(competitive, "competitive");
 assert.equal(competitive.sections[0].kind, "topic-index");
 assert.equal(competitive.sections[0].items.length, 15);
 assert.deepEqual(
@@ -47,12 +92,14 @@ assert.match(expandedCardSource, /renderDescendants\(card\.nodes, 0, card\.title
 assert.doesNotMatch(expandedCardSource, /<details|<summary/);
 
 const other = parse("other", "other");
+assertSourceLocations(other, "other");
 assert.deepEqual(
   other.sections.map((section) => section.title),
   ["RKCB", "ノンシリアス3NT", "枚数が減った後のリード", "その他", "ACOL 4NT"],
 );
 
 const carding = parse("carding", "carding");
+assertSourceLocations(carding, "carding");
 assert.deepEqual(carding.sections.map((section) => section.title), ["Memo"]);
 
 const sectionOrderSource = appSource.slice(
