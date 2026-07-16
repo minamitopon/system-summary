@@ -81,19 +81,39 @@ const heartsCatchAll = vsTwoHeartsThreeClubs.nodes.find((node) => normalizeNodeT
 const fourSpades = heartsCatchAll.children.find((node) => normalizeNodeText(node) === "3H S4");
 assert.deepEqual(normalizedChildren(fourSpades), [
   "3S ask stopper",
+  "3NT have stopper",
   "4C S/T",
   "4D NAT",
   "4H S4, Good",
   "4S S4, NF",
 ]);
-assert.deepEqual(normalizedChildren(fourSpades.children[0]), ["3NT have stopper"]);
+assert.equal(fourSpades.children[0].children.length, 0);
 const fiveSpades = vsTwoHeartsThreeClubs.nodes.find((node) => normalizeNodeText(node) === "3H S5+");
-assert.deepEqual(normalizedChildren(fiveSpades), ["3S ask stopper", "4H S3+, Good", "4S S3+, NF"]);
-assert.deepEqual(normalizedChildren(fiveSpades.children[0]), ["3NT have stopper"]);
+assert.deepEqual(normalizedChildren(fiveSpades), [
+  "3S ask stopper",
+  "3NT have stopper",
+  "4H S3+, Good",
+  "4S S3+, NF",
+]);
 const spadesCatchAll = vsTwoSpadesThreeClubs.nodes.find((node) => normalizeNodeText(node).startsWith("3D catch all"));
 const fourHearts = spadesCatchAll.children.find((node) => normalizeNodeText(node) === "3H H4");
-assert.deepEqual(normalizedChildren(fourHearts), ["3S ask stopper", "4C S/T", "4D H4, Good", "4H H4, NF"]);
-assert.deepEqual(normalizedChildren(fourHearts.children[0]), ["3NT have stopper"]);
+assert.deepEqual(normalizedChildren(fourHearts), [
+  "3S ask stopper",
+  "3NT have stopper",
+  "4C S/T",
+  "4D H4, Good",
+  "4H H4, NF",
+]);
+assert.equal(fourHearts.children[0].children.length, 0);
+const directSpadeAsk = spadesCatchAll.children.find((node) => normalizeNodeText(node) === "3S ask stopper");
+assert.deepEqual(normalizedChildren(directSpadeAsk), ["3NT have stopper"]);
+const fiveHearts = vsTwoSpadesThreeClubs.nodes.find((node) => normalizeNodeText(node) === "3H H5+");
+assert.deepEqual(normalizedChildren(fiveHearts), [
+  "3S ask stopper",
+  "3NT have stopper",
+  "4D H3+, Good",
+  "4H H3+, NF",
+]);
 assert.deepEqual(
   competitive.sections[2].blocks.map((block) => block.title),
   ["2-1 Lebensohl", "Situation", "2NT Pup to 3C", "2-2 Rubensohl", "Situation", "2NT TRF, Clubs"],
