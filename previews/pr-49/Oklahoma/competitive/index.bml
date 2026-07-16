@@ -314,7 +314,7 @@ new suit = NAT, NF
 3D  catch all, F1
   - 3H  S4
     - 3S  ask stopper
-    - 3NT have stopper
+      - 3NT have stopper
     - 4C  S/T
     - 4D  NAT
     - 4H  S4, Good
@@ -324,8 +324,8 @@ new suit = NAT, NF
 3H  S5+
   - 3S  ask stopper
     - 3NT have stopper
-    - 4H  S3+, Good
-    - 4S  S3+, NF
+  - 4H  S3+, Good
+  - 4S  S3+, NF
 3S  D5+, Good
 3NT play
 
@@ -345,9 +345,9 @@ new suit = NAT, NF
   - 3H  H4
     - 3S  ask stopper
       - 3NT have stopper
-      - 4C S/T
-      - 4D H4, Good
-      - 4H H4, NF
+    - 4C S/T
+    - 4D H4, Good
+    - 4H H4, NF
 3H  H5+
   - 3S  ask stopper
     - 3NT have stopper
