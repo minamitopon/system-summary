@@ -73,6 +73,27 @@ assert.deepEqual(
 assert.equal(competitive.sections.at(-3).title, "15. Negative Double");
 assert.equal(competitive.sections.at(-2).title, "16. vs Preemptive");
 assert.equal(competitive.sections.at(-1).title, "Overcall");
+const vsPreemptive = competitive.sections.at(-2);
+const normalizeNodeText = (node) => node.text.replace(/\s+/g, " ");
+const normalizedChildren = (node) => node.children.map(normalizeNodeText);
+const [vsTwoHeartsThreeClubs, , vsTwoSpadesThreeClubs] = vsPreemptive.blocks;
+const heartsCatchAll = vsTwoHeartsThreeClubs.nodes.find((node) => normalizeNodeText(node).startsWith("3D catch all"));
+const fourSpades = heartsCatchAll.children.find((node) => normalizeNodeText(node) === "3H S4");
+assert.deepEqual(normalizedChildren(fourSpades), [
+  "3S ask stopper",
+  "4C S/T",
+  "4D NAT",
+  "4H S4, Good",
+  "4S S4, NF",
+]);
+assert.deepEqual(normalizedChildren(fourSpades.children[0]), ["3NT have stopper"]);
+const fiveSpades = vsTwoHeartsThreeClubs.nodes.find((node) => normalizeNodeText(node) === "3H S5+");
+assert.deepEqual(normalizedChildren(fiveSpades), ["3S ask stopper", "4H S3+, Good", "4S S3+, NF"]);
+assert.deepEqual(normalizedChildren(fiveSpades.children[0]), ["3NT have stopper"]);
+const spadesCatchAll = vsTwoSpadesThreeClubs.nodes.find((node) => normalizeNodeText(node).startsWith("3D catch all"));
+const fourHearts = spadesCatchAll.children.find((node) => normalizeNodeText(node) === "3H H4");
+assert.deepEqual(normalizedChildren(fourHearts), ["3S ask stopper", "4C S/T", "4D H4, Good", "4H H4, NF"]);
+assert.deepEqual(normalizedChildren(fourHearts.children[0]), ["3NT have stopper"]);
 assert.deepEqual(
   competitive.sections[2].blocks.map((block) => block.title),
   ["2-1 Lebensohl", "Situation", "2NT Pup to 3C", "2-2 Rubensohl", "Situation", "2NT TRF, Clubs"],
