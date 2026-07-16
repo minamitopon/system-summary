@@ -138,6 +138,8 @@ const state = {
   comments: [],
   composerMode: "edit",
   composerTargetId: null,
+  previewChanges: new Map(),
+  previewMetadata: null,
 };
 
 const contentRoot = document.querySelector("#content-root");
@@ -155,13 +157,14 @@ const editMode = document.querySelector("#edit-mode");
 init();
 
 async function init() {
-  renderNavigation();
   bindControls();
+  await loadPreviewChangeManifest();
+  renderNavigation();
 
   const results = await Promise.all(
     DOCUMENTS.map(async (documentMeta) => {
       try {
-        const response = await fetch(encodeURI(documentMeta.path));
+        const response = await fetch(encodeURI(documentMeta.path), { cache: "no-store" });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const source = await response.text();
         return [documentMeta.id, parseDocument(documentMeta, source)];
@@ -190,6 +193,21 @@ async function init() {
   scrollToRequestedTopic("auto");
 }
 
+async function loadPreviewChangeManifest() {
+  try {
+    const response = await fetch("preview-changes.json", { cache: "no-store" });
+    if (!response.ok) return;
+    const manifest = await response.json();
+    if (manifest.version !== 1 || !manifest.files || typeof manifest.files !== "object") return;
+    state.previewMetadata = manifest;
+    state.previewChanges = new Map(
+      Object.entries(manifest.files).map(([path, lines]) => [path, new Set(lines.filter(Number.isInteger))]),
+    );
+  } catch {
+    // Production and local previews do not have a PR change manifest.
+  }
+}
+
 function getInitialDocumentId() {
   const fromHash = new URLSearchParams(window.location.hash.replace(/^#/, "")).get("doc");
   const stored = localStorage.getItem(STORAGE_KEYS.activeDocument);
@@ -207,8 +225,8 @@ function readStoredSet(key) {
 }
 
 function parseDocument(meta, source) {
-  const normalized = source.replace(/\r\n/g, "\n").trim();
-  if (!normalized) return { ...meta, source: normalized, sections: [] };
+  const normalized = source.replace(/\r\n/g, "\n").trimEnd();
+  if (!normalized.trim()) return { ...meta, source: normalized, sections: [] };
 
   if (meta.id === "competitive") return parseCompetitiveDocument(meta, normalized);
 
@@ -217,14 +235,22 @@ function parseDocument(meta, source) {
   const sections = [];
 
   if (!markers.length) {
-    sections.push(createSection("Notes", normalized, meta, 0));
+    sections.push(createSection("Notes", normalized, meta, 0, { sourceLine: 1, bodyStartLine: 1 }));
   } else {
     markers.forEach((marker) => {
       const bodyStart = marker.index + marker[0].length;
       const markerIndex = markers.indexOf(marker);
       const bodyEnd = markers[markerIndex + 1]?.index ?? normalized.length;
-      const body = normalized.slice(bodyStart, bodyEnd).trim();
-      if (body) sections.push(createSection(marker[1].trim(), body, meta, sections.length));
+      const bodySlice = getTrimmedSourceSlice(normalized, bodyStart, bodyEnd);
+      const titleIndex = marker.index + marker[0].indexOf(marker[1]);
+      if (bodySlice.value) {
+        sections.push(
+          createSection(marker[1].trim(), bodySlice.value, meta, sections.length, {
+            sourceLine: getSourceLineNumber(normalized, titleIndex),
+            bodyStartLine: getSourceLineNumber(normalized, bodySlice.startIndex),
+          }),
+        );
+      }
     });
   }
 
@@ -236,22 +262,37 @@ function parseCompetitiveDocument(meta, normalized) {
   const markers = [...normalized.matchAll(sectionPattern)];
   const detailMarkerIndex = markers.findIndex((marker) => marker[1].trim().toLowerCase() === "detail");
   const overcallMarkerIndex = markers.findIndex((marker) => marker[1].trim().toLowerCase() === "overcall");
-  if (detailMarkerIndex < 0) return { ...meta, source: normalized, sections: [createSection("Notes", normalized, meta, 0)] };
+  if (detailMarkerIndex < 0) {
+    return {
+      ...meta,
+      source: normalized,
+      sections: [createSection("Notes", normalized, meta, 0, { sourceLine: 1, bodyStartLine: 1 })],
+    };
+  }
 
   const detailMarker = markers[detailMarkerIndex];
   const detailStart = detailMarker.index + detailMarker[0].length;
   const detailEnd = markers[detailMarkerIndex + 1]?.index ?? normalized.length;
-  const detailBody = normalized.slice(detailStart, detailEnd).trim();
+  const detailSlice = getTrimmedSourceSlice(normalized, detailStart, detailEnd);
+  const detailBody = detailSlice.value;
   const topicPattern = /^(\d+),\s*(.+)$/gm;
   const topicMarkers = [...detailBody.matchAll(topicPattern)];
   const topics = topicMarkers.map((marker, index) => {
     const bodyStart = marker.index + marker[0].length;
     const bodyEnd = topicMarkers[index + 1]?.index ?? detailBody.length;
+    const absoluteTopicIndex = detailSlice.startIndex + marker.index;
+    const bodySlice = getTrimmedSourceSlice(
+      normalized,
+      detailSlice.startIndex + bodyStart,
+      detailSlice.startIndex + bodyEnd,
+    );
     return {
       number: marker[1],
       title: marker[2].trim(),
-      body: detailBody.slice(bodyStart, bodyEnd).trim(),
+      body: bodySlice.value,
       anchorId: `competitive-topic-${marker[1]}`,
+      sourceLine: getSourceLineNumber(normalized, absoluteTopicIndex),
+      bodyStartLine: getSourceLineNumber(normalized, bodySlice.startIndex),
     };
   });
 
@@ -259,11 +300,19 @@ function parseCompetitiveDocument(meta, normalized) {
     {
       title: "Topics",
       kind: "topic-index",
-      items: topics.map(({ number, title, anchorId }) => ({ number, title, anchorId })),
+      path: meta.path,
+      sourceLine: getSourceLineNumber(normalized, detailMarker.index),
+      items: topics.map(({ number, title, anchorId, sourceLine }) => ({
+        number,
+        title,
+        anchorId,
+        path: meta.path,
+        sourceLine,
+      })),
       blocks: [],
     },
     ...topics.map((topic, index) => ({
-      ...createSection(`${topic.number}. ${topic.title}`, topic.body, meta, index + 1),
+      ...createSection(`${topic.number}. ${topic.title}`, topic.body, meta, index + 1, topic),
       kind: "competitive-topic",
       topicNumber: topic.number,
       anchorId: topic.anchorId,
@@ -274,39 +323,76 @@ function parseCompetitiveDocument(meta, normalized) {
     const overcallMarker = markers[overcallMarkerIndex];
     const overcallStart = overcallMarker.index + overcallMarker[0].length;
     const overcallEnd = markers[overcallMarkerIndex + 1]?.index ?? normalized.length;
-    const overcallBody = normalized.slice(overcallStart, overcallEnd).trim();
-    if (overcallBody) sections.push(createSection("Overcall", overcallBody, meta, sections.length));
+    const overcallSlice = getTrimmedSourceSlice(normalized, overcallStart, overcallEnd);
+    const overcallTitleIndex = overcallMarker.index + overcallMarker[0].indexOf(overcallMarker[1]);
+    if (overcallSlice.value) {
+      sections.push(
+        createSection("Overcall", overcallSlice.value, meta, sections.length, {
+          sourceLine: getSourceLineNumber(normalized, overcallTitleIndex),
+          bodyStartLine: getSourceLineNumber(normalized, overcallSlice.startIndex),
+        }),
+      );
+    }
   }
 
   return { ...meta, source: normalized, sections };
 }
 
-function createSection(title, body, meta, sectionIndex) {
-  const blocks = body
-    .split(/\n\s*\n+/)
-    .map((block) => block.trimEnd())
-    .filter(Boolean)
-    .map((block, blockIndex) => createCard(block, meta, sectionIndex, blockIndex));
-
-  return { title, blocks };
+function getSourceLineNumber(source, index) {
+  return source.slice(0, Math.max(0, index)).split("\n").length;
 }
 
-function createCard(block, meta, sectionIndex, blockIndex) {
-  const lines = block.split("\n").filter((line) => line.trim());
-  const first = lines[0]?.trim() || "Notes";
+function getTrimmedSourceSlice(source, startIndex, endIndex) {
+  const raw = source.slice(startIndex, endIndex);
+  const value = raw.trim();
+  const relativeStart = value ? raw.indexOf(value) : 0;
+  return { value, startIndex: startIndex + relativeStart };
+}
+
+function createSection(title, body, meta, sectionIndex, location = {}) {
+  let searchIndex = 0;
+  const blocks = body
+    .split(/\n\s*\n+/)
+    .map((rawBlock) => {
+      const block = rawBlock.trimEnd();
+      const blockIndex = body.indexOf(rawBlock, searchIndex);
+      searchIndex = blockIndex + rawBlock.length;
+      return {
+        block,
+        sourceLine: (location.bodyStartLine || 1) + getSourceLineNumber(body, blockIndex) - 1,
+      };
+    })
+    .filter(({ block }) => Boolean(block))
+    .map(({ block, sourceLine }, blockIndex) => createCard(block, meta, sectionIndex, blockIndex, sourceLine));
+
+  return {
+    title,
+    blocks,
+    path: meta.path,
+    sourceLine: location.sourceLine || location.bodyStartLine || 1,
+  };
+}
+
+function createCard(block, meta, sectionIndex, blockIndex, blockStartLine = 1) {
+  const lines = block
+    .split("\n")
+    .map((raw, index) => ({ raw, sourceLine: blockStartLine + index }))
+    .filter(({ raw }) => raw.trim());
+  const first = lines[0]?.raw.trim() || "Notes";
   const title = cleanLine(first.replace(/^#{1,6}\s*/, ""));
   const id = `${meta.id}-${sectionIndex}-${blockIndex}`;
   const nodes = parseLineTree(lines.slice(1), id);
 
-  annotateNodes(nodes, { cardId: id, topNodeId: null, ancestors: [title] });
+  annotateNodes(nodes, { cardId: id, topNodeId: null, ancestors: [title], path: meta.path });
 
   return {
     id,
     documentId: meta.id,
     path: meta.path,
     title,
-    lines,
+    lines: lines.map(({ raw }) => raw),
     nodes,
+    sourceLine: lines[0]?.sourceLine || blockStartLine,
   };
 }
 
@@ -314,9 +400,10 @@ function parseLineTree(lines, cardId) {
   if (!lines.length) return [];
   const parsed = lines.map((line, index) => ({
     id: `${cardId}-node-${index}`,
-    raw: line,
-    indent: line.match(/^\s*/)[0].length,
-    text: cleanLine(line),
+    raw: line.raw,
+    indent: getIndentWidth(line.raw),
+    text: cleanLine(line.raw),
+    sourceLine: line.sourceLine,
     children: [],
   }));
   const minIndent = Math.min(...parsed.map((item) => item.indent));
@@ -336,16 +423,25 @@ function parseLineTree(lines, cardId) {
   return roots;
 }
 
+function getIndentWidth(line) {
+  return [...(line.match(/^[\t ]*/)?.[0] || "")].reduce(
+    (width, character) => width + (character === "\t" ? 2 : 1),
+    0,
+  );
+}
+
 function annotateNodes(nodes, context) {
   nodes.forEach((node) => {
     const topNodeId = context.topNodeId || node.id;
     node.cardId = context.cardId;
     node.topNodeId = topNodeId;
+    node.path = context.path;
     node.contextText = [...context.ancestors, node.text].join(" ; ");
     annotateNodes(node.children, {
       cardId: context.cardId,
       topNodeId,
       ancestors: [...context.ancestors, node.text],
+      path: context.path,
     });
   });
 }
@@ -427,20 +523,59 @@ function walkNodes(nodes, callback) {
   });
 }
 
+function hasDocumentPreviewChanges(path) {
+  return Boolean(state.previewChanges.get(path)?.size);
+}
+
+function isPreviewChanged(item) {
+  return Boolean(
+    item?.path &&
+      Number.isInteger(item.sourceLine) &&
+      state.previewChanges.get(item.path)?.has(item.sourceLine),
+  );
+}
+
+function nodeHasPreviewChanges(node) {
+  return isPreviewChanged(node) || node.children.some(nodeHasPreviewChanges);
+}
+
+function cardHasPreviewChanges(card) {
+  return isPreviewChanged(card) || card.nodes.some(nodeHasPreviewChanges);
+}
+
+function sectionHasPreviewChanges(section, cards = section.blocks) {
+  return (
+    isPreviewChanged(section) ||
+    section.items?.some(isPreviewChanged) ||
+    cards.some(cardHasPreviewChanges)
+  );
+}
+
+function renderPreviewChangeBadge(label = "このPRで変更") {
+  return `<span class="pr-change-badge">${escapeHtml(label)}</span>`;
+}
+
 function renderNavigation() {
   sidebarNav.innerHTML = DOCUMENTS.map(
-    (item) => `
-      <button class="nav-item accent-${item.accent}" type="button" data-document-id="${item.id}"
+    (item) => {
+      const hasChanges = hasDocumentPreviewChanges(item.path);
+      return `
+      <button class="nav-item accent-${item.accent}${hasChanges ? " nav-item--changed" : ""}" type="button" data-document-id="${item.id}"
         aria-current="${item.id === state.activeDocumentId ? "page" : "false"}">
         <span class="nav-label">${item.label}</span>
         <span class="nav-subtitle">${item.subtitle}</span>
-      </button>`,
+        ${hasChanges ? '<span class="nav-change-dot" title="このPRで変更あり" aria-label="このPRで変更あり"></span>' : ""}
+      </button>`;
+    },
   ).join("");
 
   mobileNav.innerHTML = DOCUMENTS.map(
-    (item) => `
-      <button class="mobile-nav-item accent-${item.accent}" type="button" data-document-id="${item.id}"
-        aria-current="${item.id === state.activeDocumentId ? "page" : "false"}">${item.label}</button>`,
+    (item) => {
+      const hasChanges = hasDocumentPreviewChanges(item.path);
+      return `
+      <button class="mobile-nav-item accent-${item.accent}${hasChanges ? " mobile-nav-item--changed" : ""}" type="button" data-document-id="${item.id}"
+        aria-current="${item.id === state.activeDocumentId ? "page" : "false"}">${item.label}${hasChanges ? '<span class="mobile-change-dot" aria-label="このPRで変更あり"></span>' : ""}</button>`;
+    },
   ).join("");
 
   document.querySelectorAll("[data-document-id]").forEach((button) => {
@@ -551,6 +686,11 @@ function renderActiveDocument() {
           原文を見る <span aria-hidden="true">↗</span>
         </a>
       </header>
+      ${
+        hasDocumentPreviewChanges(documentData.path)
+          ? `<div class="pr-change-banner"><strong>このPRの変更箇所</strong><span>黄色で表示し、変更を含む項目は自動で開いています。</span></div>`
+          : ""
+      }
       <div class="document-stats" aria-label="文書情報">
         <span><strong>${totalCards}</strong> topics</span>
         <span>${
@@ -611,11 +751,12 @@ function renderSection(section, documentData, deferMemos = false) {
     (card) => !state.embeddedCardIds.has(card.id) && !isSystemMemo(card),
   );
   const sectionId = section.anchorId ? ` id="${escapeHtml(section.anchorId)}"` : "";
+  const hasChanges = sectionHasPreviewChanges(section, visibleBlocks);
   const biddingSection = visibleBlocks.length
     ? `
-      <section class="note-section${section.kind === "competitive-topic" ? " competitive-topic-section" : ""}"${sectionId}>
+      <section class="note-section${section.kind === "competitive-topic" ? " competitive-topic-section" : ""}${hasChanges ? " pr-change-section" : ""}"${sectionId}>
         <div class="section-heading">
-          <span></span><h3>${escapeHtml(section.title)}</h3><small>${visibleBlocks.length} topics</small>
+          <span></span><h3>${escapeHtml(section.title)}${hasChanges ? renderPreviewChangeBadge("変更あり") : ""}</h3><small>${visibleBlocks.length} topics</small>
         </div>
         <div class="card-stack">${visibleBlocks
           .map((card) => {
@@ -631,17 +772,18 @@ function renderSection(section, documentData, deferMemos = false) {
 }
 
 function renderTopicIndex(section) {
+  const hasChanges = sectionHasPreviewChanges(section);
   return `
-    <section class="note-section topic-index-section">
+    <section class="note-section topic-index-section${hasChanges ? " pr-change-section" : ""}">
       <div class="section-heading">
-        <span></span><h3>Topics</h3><small>${section.items.length} sections</small>
+        <span></span><h3>Topics${hasChanges ? renderPreviewChangeBadge("変更あり") : ""}</h3><small>${section.items.length} sections</small>
       </div>
       <nav class="topic-index" aria-label="Competitive topics">
         ${section.items
           .map(
             (item) => `
-              <button type="button" class="topic-index-item" data-topic-target="${escapeHtml(item.anchorId)}">
-                <span>${escapeHtml(item.number)}</span><strong>${decorateText(item.title, item.title)}</strong>
+              <button type="button" class="topic-index-item${isPreviewChanged(item) ? " pr-change-exact" : ""}" data-topic-target="${escapeHtml(item.anchorId)}">
+                <span>${escapeHtml(item.number)}</span><strong>${decorateText(item.title, item.title)}${isPreviewChanged(item) ? renderPreviewChangeBadge() : ""}</strong>
               </button>`,
           )
           .join("")}
@@ -654,9 +796,10 @@ function isCompetitiveSubheading(section, card) {
 }
 
 function renderCompetitiveSubheading(card) {
+  const changed = cardHasPreviewChanges(card);
   return `
-    <div class="competitive-subheading">
-      <h4>${decorateText(card.title, card.title)}</h4>
+    <div class="competitive-subheading${changed ? " pr-change-exact" : ""}">
+      <h4>${decorateText(card.title, card.title)}${changed ? renderPreviewChangeBadge() : ""}</h4>
       ${renderInlineActions(card.id, true)}
       ${renderComments(card.id)}
     </div>`;
@@ -667,10 +810,11 @@ function isSystemMemo(card) {
 }
 
 function renderMemoSection(cards) {
+  const hasChanges = cards.some(cardHasPreviewChanges);
   return `
-    <section class="note-section memo-section">
+    <section class="note-section memo-section${hasChanges ? " pr-change-section" : ""}">
       <div class="section-heading">
-        <span></span><h3>Memo</h3><small>${cards.length} notes</small>
+        <span></span><h3>Memo${hasChanges ? renderPreviewChangeBadge("変更あり") : ""}</h3><small>${cards.length} notes</small>
       </div>
       <div class="memo-stack">${cards.map((card) => renderMemoBlock(card)).join("")}</div>
     </section>`;
@@ -680,11 +824,13 @@ function renderMemoBlock(card) {
   const items = [];
   walkNodes(card.nodes, (node) => items.push(node));
   const isOff = /^system\s+off\b/i.test(card.title.trim());
+  const hasChanges = cardHasPreviewChanges(card);
+  const exactChange = isPreviewChanged(card);
 
   return `
-    <article class="memo-card ${isOff ? "memo-card--off" : "memo-card--on"}">
+    <article class="memo-card ${isOff ? "memo-card--off" : "memo-card--on"}${hasChanges ? " pr-change-container" : ""}">
       <header class="memo-header">
-        <span class="memo-status">${escapeHtml(card.title)}</span>
+        <span class="memo-status">${escapeHtml(card.title)}</span>${exactChange ? renderPreviewChangeBadge() : ""}
         <span class="memo-header-actions">${renderCommentCount(card.id)}${renderInlineActions(card.id, true)}</span>
       </header>
       ${renderComments(card.id)}
@@ -692,9 +838,9 @@ function renderMemoBlock(card) {
         ${items
           .map(
             (item) => `
-              <div class="memo-item">
+              <div class="memo-item${isPreviewChanged(item) ? " pr-change-exact" : ""}">
                 <div class="memo-line">
-                  <span>${decorateText(item.text, item.contextText)}</span>
+                  <span>${decorateText(item.text, item.contextText)}${isPreviewChanged(item) ? renderPreviewChangeBadge() : ""}</span>
                   ${renderCommentCount(item.id)}
                   ${renderInlineActions(item.id, true)}
                 </div>
@@ -707,10 +853,11 @@ function renderMemoBlock(card) {
 }
 
 function renderOpeningOverview(section, documentData) {
+  const hasChanges = sectionHasPreviewChanges(section);
   return `
-    <section class="note-section opening-overview-section">
+    <section class="note-section opening-overview-section${hasChanges ? " pr-change-section" : ""}">
       <div class="section-heading">
-        <span></span><h3>Opening Overview</h3><small>hand types</small>
+        <span></span><h3>Opening Overview${hasChanges ? renderPreviewChangeBadge("変更あり") : ""}</h3><small>hand types</small>
       </div>
       <div class="opening-overview accent-${documentData.accent}">
         ${section.blocks.map((card) => renderOverviewBlock(card)).join("")}
@@ -719,8 +866,10 @@ function renderOpeningOverview(section, documentData) {
 }
 
 function renderOverviewBlock(card) {
-  const items = [{ id: card.id, text: card.title, context: card.title }];
-  walkNodes(card.nodes, (node) => items.push({ id: node.id, text: node.text, context: node.contextText }));
+  const items = [{ id: card.id, text: card.title, context: card.title, path: card.path, sourceLine: card.sourceLine }];
+  walkNodes(card.nodes, (node) =>
+    items.push({ id: node.id, text: node.text, context: node.contextText, path: node.path, sourceLine: node.sourceLine }),
+  );
   const numbered = items.every((item) => /^\d+,\s*/.test(item.text));
 
   return `
@@ -730,10 +879,10 @@ function renderOverviewBlock(card) {
           const match = item.text.match(/^(\d+),\s*(.*)$/);
           const displayText = match ? match[2] : item.text;
           return `
-            <div class="overview-item">
+            <div class="overview-item${isPreviewChanged(item) ? " pr-change-exact" : ""}">
               <div class="overview-line">
                 ${match ? `<span class="overview-number">${match[1]}</span>` : `<span class="overview-mark" aria-hidden="true"></span>`}
-                <span class="overview-copy">${decorateText(displayText, item.context)}</span>
+                <span class="overview-copy">${decorateText(displayText, item.context)}${isPreviewChanged(item) ? renderPreviewChangeBadge() : ""}</span>
                 ${renderInlineActions(item.id, true)}
                 ${renderCommentCount(item.id)}
               </div>
@@ -745,20 +894,22 @@ function renderOverviewBlock(card) {
 }
 
 function renderCard(card, documentData, options = {}) {
-  const isOpen = options.forceOpen || state.openCards.has(card.id);
+  const hasChanges = cardHasPreviewChanges(card);
+  const exactChange = isPreviewChanged(card);
+  const isOpen = options.forceOpen || hasChanges || state.openCards.has(card.id);
   if (!card.nodes.length) {
     return `
-      <div class="system-card system-card--static accent-${documentData.accent}">
-        <span class="summary-copy">${decorateText(card.title, card.title)}</span>
+      <div class="system-card system-card--static accent-${documentData.accent}${hasChanges ? " pr-change-container" : ""}">
+        <span class="summary-copy">${decorateText(card.title, card.title)}${exactChange ? renderPreviewChangeBadge() : ""}</span>
         ${renderInlineActions(card.id)}
         ${renderComments(card.id)}
       </div>`;
   }
 
   return `
-    <details class="system-card accent-${documentData.accent}" data-state-id="${card.id}" data-state-kind="card" ${isOpen ? "open" : ""}>
+    <details class="system-card accent-${documentData.accent}${hasChanges ? " pr-change-container" : ""}" data-state-id="${card.id}" data-state-kind="card" ${isOpen ? "open" : ""}>
       <summary>
-        <span class="summary-copy">${decorateText(card.title, card.title)}</span>
+        <span class="summary-copy">${decorateText(card.title, card.title)}${exactChange ? renderPreviewChangeBadge() : hasChanges ? renderPreviewChangeBadge("変更あり") : ""}</span>
         <span class="summary-meta">${renderCommentCount(card.id)}${renderInlineActions(card.id, true)}<span class="chevron" aria-hidden="true"></span></span>
       </summary>
       <div class="card-body">
@@ -771,6 +922,8 @@ function renderCard(card, documentData, options = {}) {
 }
 
 function renderExpandedCard(card, documentData) {
+  const hasChanges = cardHasPreviewChanges(card);
+  const exactChange = isPreviewChanged(card);
   const comments = renderComments(card.id);
   const body = comments || card.nodes.length
     ? `
@@ -781,9 +934,9 @@ function renderExpandedCard(card, documentData) {
     : "";
 
   return `
-    <article class="system-card system-card--expanded accent-${documentData.accent}">
+    <article class="system-card system-card--expanded accent-${documentData.accent}${hasChanges ? " pr-change-container" : ""}">
       <header class="expanded-card-heading">
-        <span class="summary-copy">${decorateText(card.title, card.title)}</span>
+        <span class="summary-copy">${decorateText(card.title, card.title)}${exactChange ? renderPreviewChangeBadge() : hasChanges ? renderPreviewChangeBadge("変更あり") : ""}</span>
         <span class="summary-meta">${renderCommentCount(card.id)}${renderInlineActions(card.id, true)}</span>
       </header>
       ${body}
@@ -796,12 +949,15 @@ function renderTopResponse(node, documentData, card, forceOpen = false) {
   const hasChildren = node.children.length > 0 || Boolean(linkedCard?.nodes.length);
   const conventionReference = renderConventionReference(card.title, node.text);
   if (!hasChildren) return renderResponseRow(node, context, 0, conventionReference);
-  const isOpen = forceOpen || state.openResponses.has(node.id);
+  const linkedChanges = Boolean(linkedCard && cardHasPreviewChanges(linkedCard));
+  const hasChanges = nodeHasPreviewChanges(node) || linkedChanges;
+  const exactChange = isPreviewChanged(node);
+  const isOpen = forceOpen || hasChanges || state.openResponses.has(node.id);
 
   return `
-    <details class="response-card ${linkedCard ? "response-card--linked" : ""} accent-${documentData.accent}" data-state-id="${node.id}" data-state-kind="response" ${isOpen ? "open" : ""}>
+    <details class="response-card ${linkedCard ? "response-card--linked" : ""} accent-${documentData.accent}${hasChanges ? " pr-change-container" : ""}" data-state-id="${node.id}" data-state-kind="response" ${isOpen ? "open" : ""}>
       <summary>
-        <span>${decorateText(node.text, context)}</span>
+        <span>${decorateText(node.text, context)}${exactChange ? renderPreviewChangeBadge() : hasChanges ? renderPreviewChangeBadge("変更あり") : ""}</span>
         <span class="response-summary-meta">${conventionReference}${renderCommentCount(node.id)}${renderInlineActions(node.id, true)}<span class="chevron" aria-hidden="true"></span></span>
       </summary>
       <div class="response-body">
@@ -829,11 +985,12 @@ function renderDescendants(nodes, depth, parentContext) {
 }
 
 function renderResponseRow(node, context, depth, conventionReference = "") {
+  const changed = isPreviewChanged(node);
   return `
-    <div class="response-row-wrap" style="--depth:${Math.min(depth, 7)}">
+    <div class="response-row-wrap${changed ? " pr-change-exact" : ""}" style="--depth:${Math.min(depth, 7)}">
       <div class="response-row">
         <span class="branch-mark" aria-hidden="true"></span>
-        <span class="response-copy">${decorateText(node.text, context)}</span>
+        <span class="response-copy">${decorateText(node.text, context)}${changed ? renderPreviewChangeBadge() : ""}</span>
         ${conventionReference}
         ${renderInlineActions(node.id, true)}
         ${renderCommentCount(node.id)}
