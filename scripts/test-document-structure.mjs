@@ -95,7 +95,21 @@ const other = parse("other", "other");
 assertSourceLocations(other, "other");
 assert.deepEqual(
   other.sections.map((section) => section.title),
-  ["RKCB", "ノンシリアス3NT", "枚数が減った後のリード", "その他", "ACOL 4NT"],
+  ["RKCB", "ノンシリアス3NT", "枚数が減った後のリード", "その他", "ACOL 4NT", "2way Game Try"],
+);
+const gameTry = other.sections.at(-1);
+assert.deepEqual(
+  gameTry.blocks.slice(-2).map((block) => block.title),
+  ["1m - 1M; 2M - ?", "Poor suitの定義"],
+);
+assert.deepEqual(gameTry.blocks.at(-2).nodes.map((node) => node.text), ["same as above"]);
+assert.deepEqual(
+  gameTry.blocks.at(-1).nodes.map((node) => node.text),
+  [
+    "3枚以上で、2 loser以上になりそうなスート（例: Qxx）",
+    "分類しづらいINVはbalancedとして扱う",
+    "3Mを「パートナーに3NTを提案するbid」とするのは、lead-showing doubleを避けるため",
+  ],
 );
 
 const carding = parse("carding", "carding");
