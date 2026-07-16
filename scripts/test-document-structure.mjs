@@ -95,7 +95,7 @@ const other = parse("other", "other");
 assertSourceLocations(other, "other");
 assert.deepEqual(
   other.sections.map((section) => section.title),
-  ["RKCB", "ノンシリアス3NT", "枚数が減った後のリード", "その他", "ACOL 4NT"],
+  ["RKCB", "ノンシリアス3NT", "枚数が減った後のリード", "その他", "ACOL 4NT", "2way Game Try"],
 );
 
 const carding = parse("carding", "carding");
