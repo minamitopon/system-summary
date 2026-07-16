@@ -18,6 +18,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Test site
+        run: bash scripts/test-site.sh
       - name: Build static site
         run: ./scripts/build-site.sh
       - name: Publish gh-pages branch
