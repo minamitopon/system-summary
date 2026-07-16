@@ -65,12 +65,13 @@ for (const opening of ["1C", "1D", "1H", "1S", "1NT", "2C", "2D", "2M", "2NT", "
 const competitive = parse("competitive", "competitive");
 assertSourceLocations(competitive, "competitive");
 assert.equal(competitive.sections[0].kind, "topic-index");
-assert.equal(competitive.sections[0].items.length, 15);
+assert.equal(competitive.sections[0].items.length, 16);
 assert.deepEqual(
   competitive.sections.slice(0, 4).map((section) => section.title),
   ["Topics", "1. 2-suiter 2NT OC", "2. Lebensohl & Rubensohl", "3. Good 2NT, Bad 2NT"],
 );
-assert.equal(competitive.sections.at(-2).title, "15. Negative Double");
+assert.equal(competitive.sections.at(-3).title, "15. Negative Double");
+assert.equal(competitive.sections.at(-2).title, "16. vs Preemptive");
 assert.equal(competitive.sections.at(-1).title, "Overcall");
 assert.deepEqual(
   competitive.sections[2].blocks.map((block) => block.title),
