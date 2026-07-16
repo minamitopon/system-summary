@@ -1,3 +1,5 @@
+import { findSystemTip } from "./tips.js?v=1";
+
 const REPOSITORY_URL = "https://github.com/minamitopon/system-summary";
 const STORAGE_KEYS = {
   openCards: "oklahoma-system-open-cards-v2",
@@ -128,6 +130,7 @@ const DOCUMENTS = [
 const state = {
   documents: new Map(),
   targetIndex: new Map(),
+  tipIndex: new Map(),
   cardIndex: new Map(),
   embeddedCardIds: new Set(),
   activeDocumentId: getInitialDocumentId(),
@@ -356,6 +359,7 @@ function cleanLine(line) {
 
 function buildTargetIndex() {
   state.targetIndex.clear();
+  state.tipIndex.clear();
   state.cardIndex.clear();
   state.documents.forEach((documentData) => {
     documentData.sections.forEach((section) => {
@@ -385,6 +389,11 @@ function buildTargetIndex() {
         });
       });
     });
+  });
+
+  state.targetIndex.forEach((target, targetId) => {
+    const tip = findSystemTip(target);
+    if (tip) state.tipIndex.set(targetId, tip);
   });
 }
 
@@ -450,14 +459,28 @@ function renderNavigation() {
 
 function bindControls() {
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") closeActionMenus();
+    if (event.key === "Escape") {
+      closeActionMenus();
+      closeSystemTips();
+    }
   });
 
   document.addEventListener("click", (event) => {
     if (!event.target.closest(".action-menu")) closeActionMenus();
+    if (!event.target.closest(".system-tip")) closeSystemTips();
   });
-  window.addEventListener("resize", () => closeActionMenus());
-  window.addEventListener("scroll", () => closeActionMenus(), { passive: true });
+  window.addEventListener("resize", () => {
+    closeActionMenus();
+    closeSystemTips();
+  });
+  window.addEventListener(
+    "scroll",
+    () => {
+      closeActionMenus();
+      closeSystemTips();
+    },
+    { passive: true },
+  );
 
   document.querySelector("#expand-all").addEventListener("click", () => setAllVisible(true));
   document.querySelector("#collapse-all").addEventListener("click", () => setAllVisible(false));
@@ -865,6 +888,25 @@ function renderInlineActions(targetId, compact = false) {
           <button class="action-menu-item" type="button" role="menuitem" data-compose="comment" data-target-id="${targetId}"><span aria-hidden="true">◌</span>コメント</button>
         </span>
       </span>
+      ${renderSystemTip(targetId)}
+    </span>`;
+}
+
+function renderSystemTip(targetId) {
+  const tip = state.tipIndex.get(targetId);
+  if (!tip) return "";
+  const popoverId = `system-tip-${targetId}`;
+  return `
+    <span class="system-tip" data-tip-id="${escapeHtml(tip.id)}">
+      <button class="system-tip-trigger" type="button" data-system-tip-toggle aria-expanded="false"
+        aria-controls="${popoverId}" aria-describedby="${popoverId}" aria-label="背景を表示：${escapeHtml(tip.title)}">?</button>
+      <span class="system-tip-popover" id="${popoverId}" role="tooltip" hidden>
+        <span class="system-tip-kicker">BACKGROUND</span>
+        <strong>${decorateText(tip.title, tip.title)}</strong>
+        <span class="system-tip-body">
+          ${tip.paragraphs.map((paragraph) => `<span>${decorateText(paragraph, paragraph)}</span>`).join("")}
+        </span>
+      </span>
     </span>`;
 }
 
@@ -918,6 +960,30 @@ function bindContentEvents() {
     });
   });
 
+  contentRoot.querySelectorAll(".system-tip").forEach((tip) => {
+    const trigger = tip.querySelector("[data-system-tip-toggle]");
+    tip.addEventListener("mouseenter", () => openSystemTip(tip));
+    tip.addEventListener("mouseleave", () => {
+      if (tip.dataset.pinned !== "true") closeSystemTip(tip);
+    });
+    tip.addEventListener("focusin", () => openSystemTip(tip));
+    tip.addEventListener("focusout", (event) => {
+      if (tip.dataset.pinned !== "true" && !tip.contains(event.relatedTarget)) closeSystemTip(tip);
+    });
+    trigger?.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const shouldPin = tip.dataset.pinned !== "true";
+      if (!shouldPin) {
+        closeSystemTip(tip);
+        return;
+      }
+      closeSystemTips(tip);
+      tip.dataset.pinned = "true";
+      openSystemTip(tip);
+    });
+  });
+
   contentRoot.querySelectorAll("[data-compose]").forEach((button) => {
     button.addEventListener("click", (event) => {
       event.preventDefault();
@@ -968,6 +1034,7 @@ function toggleActionMenu(trigger) {
   const menu = trigger.closest(".action-menu");
   const popover = menu?.querySelector(".action-menu-popover");
   if (!menu || !popover) return;
+  closeSystemTips();
   const shouldOpen = popover.hidden;
   closeActionMenus(menu);
   if (!shouldOpen) {
@@ -1002,6 +1069,45 @@ function closeActionMenus(exceptMenu = null) {
     if (menu === exceptMenu) return;
     popover.hidden = true;
     menu?.querySelector("[data-action-menu-toggle]")?.setAttribute("aria-expanded", "false");
+  });
+}
+
+function openSystemTip(tip) {
+  const trigger = tip.querySelector("[data-system-tip-toggle]");
+  const popover = tip.querySelector(".system-tip-popover");
+  if (!trigger || !popover) return;
+  closeActionMenus();
+  closeSystemTips(tip);
+  popover.hidden = false;
+  trigger.setAttribute("aria-expanded", "true");
+  positionSystemTip(trigger, popover);
+}
+
+function positionSystemTip(trigger, popover) {
+  const gutter = 10;
+  const gap = 7;
+  const triggerRect = trigger.getBoundingClientRect();
+  const popoverRect = popover.getBoundingClientRect();
+  const left = Math.min(
+    Math.max(gutter, triggerRect.right - popoverRect.width),
+    window.innerWidth - popoverRect.width - gutter,
+  );
+  const fitsBelow = triggerRect.bottom + gap + popoverRect.height <= window.innerHeight - gutter;
+  const top = fitsBelow ? triggerRect.bottom + gap : Math.max(gutter, triggerRect.top - popoverRect.height - gap);
+  popover.style.left = `${left}px`;
+  popover.style.top = `${top}px`;
+}
+
+function closeSystemTip(tip) {
+  const popover = tip.querySelector(".system-tip-popover");
+  if (popover) popover.hidden = true;
+  tip.dataset.pinned = "false";
+  tip.querySelector("[data-system-tip-toggle]")?.setAttribute("aria-expanded", "false");
+}
+
+function closeSystemTips(exceptTip = null) {
+  contentRoot.querySelectorAll(".system-tip").forEach((tip) => {
+    if (tip !== exceptTip) closeSystemTip(tip);
   });
 }
 

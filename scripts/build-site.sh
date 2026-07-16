@@ -5,11 +5,14 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OUTPUT_DIR="${ROOT_DIR}/_site"
 
+node "${ROOT_DIR}/scripts/test-system-tips.mjs"
+
 rm -rf "${OUTPUT_DIR}"
 mkdir -p "${OUTPUT_DIR}/assets" "${OUTPUT_DIR}/Oklahoma"
 
 cp "${ROOT_DIR}/index.html" "${OUTPUT_DIR}/index.html"
 cp "${ROOT_DIR}/assets/app.js" "${OUTPUT_DIR}/assets/app.js"
+cp "${ROOT_DIR}/assets/tips.js" "${OUTPUT_DIR}/assets/tips.js"
 cp "${ROOT_DIR}/assets/styles.css" "${OUTPUT_DIR}/assets/styles.css"
 cp "${ROOT_DIR}/Oklahoma/README.md" "${OUTPUT_DIR}/Oklahoma/README.md"
 
@@ -24,4 +27,5 @@ touch "${OUTPUT_DIR}/.nojekyll"
 
 test -s "${OUTPUT_DIR}/index.html"
 test -s "${OUTPUT_DIR}/assets/app.js"
+test -s "${OUTPUT_DIR}/assets/tips.js"
 test -s "${OUTPUT_DIR}/assets/styles.css"

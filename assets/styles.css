@@ -932,6 +932,8 @@ a {
 .inline-actions {
   display: inline-flex;
   align-items: center;
+  flex: 0 0 auto;
+  gap: 2px;
 }
 
 .action-menu {
@@ -1011,6 +1013,94 @@ a {
   color: var(--navy);
   background: var(--surface-muted);
   outline: none;
+}
+
+.system-tip {
+  display: inline-flex;
+  align-items: center;
+}
+
+.system-tip-trigger {
+  display: inline-grid;
+  width: 25px;
+  height: 25px;
+  padding: 0;
+  place-items: center;
+  color: #725a2d;
+  background: #fff8e8;
+  border: 1px solid #e4d4aa;
+  border-radius: 50%;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.78rem;
+  font-weight: 850;
+  line-height: 1;
+  cursor: help;
+  transition: color 140ms ease, background 140ms ease, border-color 140ms ease, transform 140ms ease;
+}
+
+.system-tip-trigger:hover,
+.system-tip-trigger:focus-visible,
+.system-tip-trigger[aria-expanded="true"] {
+  color: white;
+  background: #8b6b2f;
+  border-color: #8b6b2f;
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.system-tip-popover {
+  position: fixed;
+  z-index: 140;
+  display: block;
+  width: min(380px, calc(100vw - 20px));
+  max-height: calc(100vh - 20px);
+  padding: 16px 17px 17px;
+  overflow-y: auto;
+  color: #34454e;
+  background: rgb(255 253 247 / 99%);
+  border: 1px solid #dfcfaa;
+  border-radius: 13px;
+  box-shadow: 0 16px 44px rgb(34 45 49 / 22%);
+  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  text-align: left;
+}
+
+.system-tip-popover[hidden] {
+  display: none;
+}
+
+.system-tip-kicker {
+  display: block;
+  margin-bottom: 5px;
+  color: #967436;
+  font-size: 0.59rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.system-tip-popover > strong {
+  display: block;
+  color: var(--navy);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.94rem;
+  line-height: 1.45;
+}
+
+.system-tip-body {
+  display: grid;
+  margin-top: 10px;
+  gap: 8px;
+  font-size: 0.74rem;
+  font-weight: 500;
+  line-height: 1.7;
+}
+
+.system-tip-body > span {
+  display: block;
+}
+
+.system-tip-body .bid-token {
+  font-size: 0.92em;
 }
 
 .system-card--static {
@@ -2014,6 +2104,16 @@ textarea.form-control {
   .action-menu-trigger {
     width: 40px;
     height: 40px;
+  }
+
+  .system-tip-trigger {
+    width: 34px;
+    height: 34px;
+    font-size: 0.82rem;
+  }
+
+  .system-tip-popover {
+    padding: 15px;
   }
 
   .proposal-drawer {
