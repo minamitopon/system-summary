@@ -320,7 +320,7 @@ new suit = NAT, NF
     - 4H  S4, Good
     - 4S  S4, NF
   - 3S  ask stopper
-    - 3NT have stopper
+  - 3NT have stopper
 3H  S5+
   - 3S  ask stopper
   - 3NT have stopper
@@ -349,7 +349,7 @@ new suit = NAT, NF
     - 4D H4, Good
     - 4H H4, NF
   - 3S  ask stopper
-    - 3NT have stopper
+  - 3NT have stopper
 3H  H5+
   - 3S  ask stopper
   - 3NT have stopper
