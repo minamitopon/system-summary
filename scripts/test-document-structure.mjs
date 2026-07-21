@@ -78,6 +78,7 @@ const normalizeNodeText = (node) => node.text.replace(/\s+/g, " ");
 const normalizedChildren = (node) => node.children.map(normalizeNodeText);
 const [vsTwoHeartsThreeClubs, , vsTwoSpadesThreeClubs] = vsPreemptive.blocks;
 const heartsCatchAll = vsTwoHeartsThreeClubs.nodes.find((node) => normalizeNodeText(node).startsWith("3D catch all"));
+assert.deepEqual(normalizedChildren(heartsCatchAll), ["3H S4", "3S ask stopper", "3NT have stopper"]);
 const fourSpades = heartsCatchAll.children.find((node) => normalizeNodeText(node) === "3H S4");
 assert.deepEqual(normalizedChildren(fourSpades), [
   "3S ask stopper",
@@ -96,6 +97,7 @@ assert.deepEqual(normalizedChildren(fiveSpades), [
   "4S S3+, NF",
 ]);
 const spadesCatchAll = vsTwoSpadesThreeClubs.nodes.find((node) => normalizeNodeText(node).startsWith("3D catch all"));
+assert.deepEqual(normalizedChildren(spadesCatchAll), ["3H H4", "3S ask stopper", "3NT have stopper"]);
 const fourHearts = spadesCatchAll.children.find((node) => normalizeNodeText(node) === "3H H4");
 assert.deepEqual(normalizedChildren(fourHearts), [
   "3S ask stopper",
@@ -105,8 +107,6 @@ assert.deepEqual(normalizedChildren(fourHearts), [
   "4H H4, NF",
 ]);
 assert.equal(fourHearts.children[0].children.length, 0);
-const directSpadeAsk = spadesCatchAll.children.find((node) => normalizeNodeText(node) === "3S ask stopper");
-assert.deepEqual(normalizedChildren(directSpadeAsk), ["3NT have stopper"]);
 const fiveHearts = vsTwoSpadesThreeClubs.nodes.find((node) => normalizeNodeText(node) === "3H H5+");
 assert.deepEqual(normalizedChildren(fiveHearts), [
   "3S ask stopper",
